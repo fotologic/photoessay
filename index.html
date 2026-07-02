@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PhotoEssay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=Quicksand:wght@600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Raleway:wght@600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Catamaran:wght@400;600&family=Merriweather:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta:#D02070; --magenta-hover:#A8185A; --magenta-soft:#E25A93; --magenta-ink:#8A0F47;
+    --grey:#A8A8B0; --grey-dark:#6C6C74; --grey-light:#D9D7D9;
+    --pink-cream:#F7DEDE; --pink-cream-2:#FBECEC; --blush:#FFF6F3;
+    --ink:#3A3A40; --ink-soft:#55555C; --paper:#FFFFFF;
+    --ok:#2E8B57; --ok-soft:#DFF0E5;
+    --ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --hfont:"Libre Baskerville",serif;
+    --bfont:Georgia,serif;
+    --shadow:0 1px 2px rgba(58,58,64,.05),0 6px 18px rgba(58,58,64,.06);
+    --shadow-lg:0 12px 40px rgba(58,58,64,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--blush); color:var(--ink); font-family:var(--ui); line-height:1.5; -webkit-font-smoothing:antialiased}
+  button{font-family:inherit; cursor:pointer}
+  :focus-visible{outline:2.5px solid var(--magenta); outline-offset:2px; border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+  .screen{display:none}
+  .screen.show{display:block}
+
+  /* ---------- auth ---------- */
+  #authScreen.show{display:flex; min-height:100vh; min-height:100dvh; align-items:center; justify-content:center; padding:24px}
+  .authcard{width:100%; max-width:430px; background:var(--paper); border:1px solid var(--grey-light); border-radius:18px;
+    box-shadow:var(--shadow-lg); padding:38px 34px 26px; text-align:center}
+  .authcard .eb{font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--grey-dark)}
+  .authcard h1{font-family:"Libre Baskerville",serif; font-weight:700; font-size:36px; margin:6px 0 8px}
+  .authcard h1 span{color:var(--magenta)}
+  .authcard .lead{font-size:14px; color:var(--grey-dark); max-width:320px; margin:0 auto 24px; line-height:1.55}
+  .signin{width:100%; display:flex; align-items:center; justify-content:center; gap:11px; background:var(--ink); color:#fff;
+    border:0; border-radius:13px; padding:15px; font-weight:700; font-size:15px}
+  .signin:hover{background:#2B2B30}
+  .gmark{width:22px;height:22px;background:#fff;border-radius:50%;display:grid;place-items:center;flex:none}
+  .gmark svg{width:14px;height:14px}
+  .authfoot{margin-top:20px; padding-top:15px; border-top:1px solid var(--grey-light); font-size:11.5px; color:var(--grey-dark); line-height:1.55}
+  .autherr{margin-top:14px; font-size:12.5px; color:var(--magenta-ink); background:var(--pink-cream-2); border:1px solid var(--pink-cream); border-radius:9px; padding:10px 12px; display:none; text-align:left}
+
+  /* ---------- app chrome ---------- */
+  .wrap{max-width:960px; margin:0 auto; padding:0 20px 90px}
+  .head{display:flex; align-items:center; gap:13px; padding:22px 0 8px; flex-wrap:wrap}
+  .head .eb{font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--grey-dark)}
+  .head .nm{font-family:"Libre Baskerville",serif; font-weight:700; font-size:26px; line-height:1.1; letter-spacing:-.01em}
+  .head .nm span{color:var(--magenta)}
+  .head .who{margin-left:auto; text-align:right}
+  .head .who .sn{font-size:13px; font-weight:600}
+  .sharerow{font-size:11.5px; color:var(--grey-dark); margin-top:2px}
+  .sharerow button{background:none; border:0; color:var(--magenta); font-weight:600; font-size:11.5px; padding:0; text-decoration:underline}
+  .savestate{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--grey-dark); margin-top:3px; justify-content:flex-end}
+  .savestate .pip{width:7px;height:7px;border-radius:50%;background:var(--grey)}
+  .savestate.saving .pip{background:var(--magenta)}
+  .savestate.saved .pip{background:var(--ok)}
+  .savestate.error .pip{background:#C0392B}
+
+  .doctitle{font-family:var(--hfont); font-weight:700; font-size:23px; outline:none; padding:4px 6px; margin:10px -6px 2px; border-radius:6px; line-height:1.3}
+  .doctitle:focus{background:var(--pink-cream-2)}
+  .doctitle:empty::before{content:"Give your essay a working title\u2026"; color:var(--grey)}
+
+  /* ---------- milestones ---------- */
+  .miles{margin:10px 0 4px; border-top:1px solid var(--grey-light); padding-top:16px}
+  .miles .mlab{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--grey-dark); margin-bottom:10px}
+  .mempty{font-size:12.5px; color:var(--grey-dark); font-style:italic}
+  .mtrack{display:flex; gap:0; align-items:flex-start; overflow-x:auto; padding-bottom:4px}
+  .mnode{flex:1; min-width:130px; position:relative; padding-top:18px}
+  .mnode::before{content:""; position:absolute; top:6px; left:0; right:0; height:2px; background:var(--grey-light)}
+  .mnode:first-child::before{left:50%}
+  .mnode:last-child::before{right:50%}
+  .mnode .bead{position:absolute; top:0; left:50%; transform:translateX(-50%); width:14px; height:14px; border-radius:50%;
+    background:var(--grey); border:3px solid var(--blush); box-shadow:0 0 0 1px var(--grey-light)}
+  .mnode.due .bead{background:var(--magenta-soft)}
+  .mnode.over .bead{background:var(--magenta)}
+  .mnode.done .bead{background:var(--ok)}
+  .mnode .mtxt{text-align:center; padding:0 8px}
+  .mnode .mt{font-size:12.5px; font-weight:600; line-height:1.3}
+  .mnode .md{font-size:11px; color:var(--grey-dark); margin-top:1px}
+  .mstatus{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-top:5px}
+  .mstatus.up{background:var(--grey-light); color:var(--grey-dark)}
+  .mstatus.due{background:var(--pink-cream-2); color:var(--magenta)}
+  .mstatus.over{background:var(--magenta); color:#fff}
+  .mstatus.done{background:var(--ok-soft); color:var(--ok)}
+  .mready{display:block; margin:6px auto 0; font-size:11px; font-weight:600; color:var(--magenta); background:none; border:1px solid var(--pink-cream); border-radius:999px; padding:3px 10px}
+  .mready:hover{background:var(--pink-cream-2)}
+  .mready.flagged{color:var(--ok); border-color:var(--ok-soft); cursor:default}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{position:sticky; top:10px; z-index:50; background:var(--paper); border:1px solid var(--grey-light);
+    border-radius:12px; box-shadow:var(--shadow); display:flex; align-items:center; gap:14px; padding:10px 14px; margin:16px 0 20px; flex-wrap:wrap}
+  .wc{flex:1; min-width:220px}
+  .wc .wctop{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-soft); margin-bottom:5px}
+  .wc .wctop b{color:var(--ink)}
+  .wcbar{position:relative; height:8px; border-radius:99px; background:var(--grey-light); overflow:hidden}
+  .wcband{position:absolute; top:0; bottom:0; background:rgba(46,139,87,.16)}
+  .wcfill{position:absolute; top:0; bottom:0; left:0; background:var(--magenta); border-radius:99px; transition:width .3s}
+  .wcfill.inrange{background:var(--ok)}
+  .wcfill.overrun{background:var(--magenta-ink)}
+  .tbtn{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    background:var(--paper); border:1px solid var(--grey-light); border-radius:9px; padding:8px 13px; position:relative}
+  .tbtn:hover{border-color:var(--grey)}
+  .tbtn .ico{font-size:14px; line-height:1}
+  .tbtn .dot{position:absolute; top:-4px; right:-4px; width:10px; height:10px; border-radius:50%; background:var(--magenta-soft); border:2px solid var(--paper)}
+  .tbtn.primary{background:var(--magenta); border-color:var(--magenta); color:#fff}
+  .tbtn.primary:hover{background:var(--magenta-hover); border-color:var(--magenta-hover)}
+
+  /* ---------- signoff banner ---------- */
+  .signbanner{border-radius:11px; padding:13px 16px; font-size:13px; margin:0 0 16px; display:none; line-height:1.5}
+  .signbanner.show{display:block}
+  .signbanner.approved{background:var(--ok-soft); color:#1F5E3B; border:1px solid #C5E2CF}
+  .signbanner.returned{background:var(--pink-cream-2); color:var(--magenta-ink); border:1px solid var(--pink-cream)}
+  .signbanner b{font-weight:700}
+
+  /* ---------- AO strip ---------- */
+  .aostrip{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:0 0 18px; font-size:12px; color:var(--grey-dark)}
+  .aostrip .aolab{font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px}
+  .aochip{display:flex; align-items:center; gap:6px; background:var(--paper); border:1px solid var(--grey-light); border-radius:999px; padding:4px 11px; font-weight:600}
+  .aochip b{font-size:12.5px; color:var(--ink)}
+  .aochip.zero{opacity:.55}
+  .aochip .aopip{width:8px; height:8px; border-radius:50%; background:var(--magenta)}
+  .aochip.zero .aopip{background:var(--grey)}
+
+  /* ---------- section cards ---------- */
+  .sections{display:flex; flex-direction:column; gap:14px}
+  .card{background:var(--paper); border:1px solid var(--grey-light); border-left:3px solid transparent; border-radius:8px; box-shadow:var(--shadow); padding:18px 22px 16px; transition:border-color .15s}
+  .card.active{border-left-color:var(--magenta)}
+  .chead{display:flex; align-items:center; gap:10px; margin-bottom:2px}
+  .ctitle{font-family:var(--hfont); font-weight:700; font-size:19px; color:var(--ink); outline:none; flex:1; min-width:0; padding:2px 4px; margin:-2px -4px; border-radius:5px}
+  .ctitle:focus{background:var(--pink-cream-2)}
+  .cmeta{display:flex; align-items:center; gap:5px; flex:none}
+  .cwords{font-size:11px; color:var(--grey-dark); font-weight:600; margin-right:4px; white-space:nowrap}
+  .iconb{width:26px; height:26px; border-radius:7px; border:1px solid var(--grey-light); background:var(--paper); color:var(--grey-dark); font-size:12px; line-height:1; display:grid; place-items:center; padding:0}
+  .iconb:hover{border-color:var(--grey); color:var(--ink)}
+  .iconb:disabled{opacity:.3; cursor:default}
+  .aotags{display:flex; gap:6px; margin:7px 0 10px; flex-wrap:wrap}
+  .aot{font-size:10.5px; font-weight:700; letter-spacing:.03em; padding:3px 10px; border-radius:999px; border:1px solid var(--grey-light); background:var(--paper); color:var(--grey-dark)}
+  .aot.on{background:var(--magenta); border-color:var(--magenta); color:#fff}
+  .aot:hover:not(.on){border-color:var(--magenta-soft); color:var(--magenta)}
+
+  .editor{font-family:var(--bfont); font-size:16px; line-height:1.72; color:var(--ink); outline:none; min-height:52px; padding:4px 2px}
+  .editor p{margin:0 0 13px}
+  .editor p:last-child{margin-bottom:0}
+  .editor blockquote{margin:14px 0 14px 22px; padding:2px 0 2px 16px; border-left:3px solid var(--magenta-soft);
+    font-style:italic; font-size:14.5px; color:var(--ink-soft)}
+  .editor figure{margin:18px auto; max-width:82%; text-align:center}
+  .editor figure img{max-width:100%; border-radius:4px; display:block; margin:0 auto; min-height:40px; background:var(--pink-cream-2)}
+  .editor figcaption{font-size:12.5px; font-style:italic; color:var(--grey-dark); margin-top:7px; outline:none}
+  .editor figcaption:focus{background:var(--pink-cream-2); border-radius:4px}
+  .editor [data-placeholder]:empty::before{content:attr(data-placeholder); color:var(--grey)}
+  .editor .flag{background:var(--pink-cream); border-bottom:2px dotted var(--magenta); border-radius:2px; cursor:pointer; padding:0 1px}
+
+  .ctools{display:flex; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid #F0EEEF; flex-wrap:wrap}
+  .ctool{font-size:11.5px; font-weight:600; color:var(--grey-dark); background:none; border:1px dashed var(--grey-light); border-radius:8px; padding:6px 12px}
+  .ctool:hover{color:var(--magenta); border-color:var(--magenta-soft)}
+
+  .fbchip{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--magenta-ink);
+    background:var(--pink-cream-2); border:1px solid var(--pink-cream); border-radius:8px; padding:5px 10px; margin-top:10px; cursor:pointer}
+  .fbchip:hover{background:var(--pink-cream)}
+
+  .addsec{margin-top:16px; width:100%; font-size:13px; font-weight:600; color:var(--grey-dark); background:none;
+    border:1.5px dashed var(--grey-light); border-radius:10px; padding:13px}
+  .addsec:hover{color:var(--magenta); border-color:var(--magenta-soft)}
+
+  /* ---------- bibliography ---------- */
+  .bib-list{list-style:none; margin:6px 0 0; padding:0; counter-reset:bib}
+  .bib-list li{font-family:var(--bfont); font-size:14px; line-height:1.6; padding:9px 26px 9px 34px; position:relative; border-bottom:1px solid #F0EEEF; counter-increment:bib}
+  .bib-list li::before{content:counter(bib) "."; position:absolute; left:6px; color:var(--grey-dark); font-family:var(--ui); font-size:12px; font-weight:600; top:11px}
+  .bib-list li .bdel{position:absolute; right:0; top:9px; font-size:11px; color:var(--grey-dark); background:none; border:1px solid var(--grey-light); border-radius:6px; padding:2px 8px; opacity:0}
+  .bib-list li:hover .bdel{opacity:1}
+  .bibform{background:var(--pink-cream-2); border:1px solid var(--pink-cream); border-radius:10px; padding:15px 16px; margin-top:12px}
+  .bibform .bfrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px}
+  .bibform .bfrow.one{grid-template-columns:1fr}
+  .bibform label{display:block; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--magenta-ink); margin-bottom:3px}
+  .bibform input,.bibform select{width:100%; font:inherit; font-size:13.5px; border:1px solid var(--grey-light); border-radius:8px; padding:8px 10px; background:var(--paper); color:var(--ink)}
+  .bfbtns{display:flex; gap:8px; justify-content:flex-end}
+  .bsave{background:var(--magenta); color:#fff; border:0; border-radius:9px; padding:9px 16px; font-weight:600; font-size:13px}
+  .bsave:hover{background:var(--magenta-hover)}
+  .bcancel{background:none; color:var(--grey-dark); border:1px solid var(--grey-light); border-radius:9px; padding:9px 14px; font-weight:600; font-size:13px}
+  .bibnote{font-size:11.5px; color:var(--grey-dark); margin-top:10px; font-style:italic}
+
+  /* ---------- slide-over panels ---------- */
+  .scrim{position:fixed; inset:0; background:rgba(58,58,64,.35); opacity:0; pointer-events:none; transition:opacity .2s; z-index:80}
+  .scrim.show{opacity:1; pointer-events:auto}
+  .panel{position:fixed; top:0; right:0; bottom:0; width:min(370px,92vw); background:var(--paper); z-index:90;
+    box-shadow:var(--shadow-lg); transform:translateX(105%); transition:transform .25s ease-out; display:flex; flex-direction:column}
+  .panel.show{transform:translateX(0)}
+  .phead{display:flex; align-items:center; justify-content:space-between; padding:18px 20px 12px; border-bottom:1px solid var(--grey-light)}
+  .phead h2{font-family:"Libre Baskerville",serif; font-size:18px; margin:0; font-weight:700}
+  .pclose{background:none; border:0; font-size:19px; color:var(--grey-dark); padding:4px 8px; border-radius:7px}
+  .pclose:hover{background:var(--pink-cream-2); color:var(--ink)}
+  .pbody{overflow-y:auto; padding:16px 20px 30px; flex:1}
+
+  .fontgroup{margin-bottom:22px}
+  .fontgroup .fglab{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--grey-dark); margin-bottom:9px}
+  .fopt{width:100%; text-align:left; background:var(--paper); border:1px solid var(--grey-light); border-radius:10px; padding:11px 14px; margin-bottom:8px; display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+  .fopt:hover{border-color:var(--grey)}
+  .fopt.sel{border:2px solid var(--magenta); padding:10px 13px}
+  .fopt .fprev{font-size:17px; color:var(--ink)}
+  .fopt .fname{font-size:11px; color:var(--grey-dark); font-weight:600; flex:none}
+  .stylenote{font-size:11.5px; color:var(--grey-dark); font-style:italic; line-height:1.5}
+
+  .fbcard{background:var(--pink-cream-2); border:1px solid var(--pink-cream); border-radius:11px; padding:13px 15px; margin-bottom:11px}
+  .fbcard .fbwho{display:flex; align-items:center; gap:8px; font-size:11.5px; font-weight:700; color:var(--magenta-ink); margin-bottom:5px}
+  .fbcard .fbwho .udot{width:8px; height:8px; border-radius:50%; background:var(--magenta-soft)}
+  .fbcard.read .fbwho .udot{display:none}
+  .fbcard .fbsec{font-size:10.5px; font-weight:600; color:var(--grey-dark); text-transform:uppercase; letter-spacing:.05em}
+  .fbcard .fbtxt{font-size:13.5px; line-height:1.55; margin:4px 0 9px; white-space:pre-wrap}
+  .fbmark{font-size:11px; font-weight:600; color:var(--magenta); background:none; border:1px solid var(--pink-cream); border-radius:999px; padding:4px 11px}
+  .fbmark:hover{background:var(--pink-cream)}
+  .fbcard.read .fbmark{display:none}
+  .fbempty{font-size:12.5px; color:var(--grey-dark); font-style:italic}
+
+  /* ---------- proofread popover ---------- */
+  .pop{position:absolute; z-index:110; background:var(--ink); color:#F2EFF0; border-radius:11px; padding:12px 14px;
+    width:250px; font-size:12.5px; line-height:1.45; box-shadow:var(--shadow-lg); display:none}
+  .pop.show{display:block}
+  .pop .popbtns{display:flex; gap:7px; margin-top:10px}
+  .pop button{font-size:11.5px; font-weight:600; border-radius:8px; padding:6px 12px; border:0}
+  .pop .pfix{background:var(--magenta); color:#fff}
+  .pop .pfix:hover{background:var(--magenta-soft)}
+  .pop .pdis{background:rgba(255,255,255,.14); color:#F2EFF0}
+
+  /* ---------- preview screen ---------- */
+  #previewScreen{position:fixed; inset:0; z-index:100; background:#EBE6E4; overflow-y:auto}
+  .pvbar{position:sticky; top:0; z-index:10; background:var(--ink); color:#F2EFF0; display:flex; align-items:center; gap:14px; padding:11px 20px; flex-wrap:wrap}
+  .pvbar .pvt{font-weight:700; font-size:13.5px}
+  .pvbar .pvsub{font-size:12px; opacity:.65}
+  .pvbar .pvbtns{margin-left:auto; display:flex; gap:9px; flex-wrap:wrap}
+  .pvbar button{font-size:12.5px; font-weight:600; border-radius:9px; padding:8px 15px; border:0}
+  .pvback{background:rgba(255,255,255,.14); color:#F2EFF0}
+  .pvsign{background:var(--magenta); color:#fff}
+  .pvsign:hover{background:var(--magenta-soft)}
+  .pvsign:disabled{background:rgba(255,255,255,.18); color:rgba(255,255,255,.5); cursor:default}
+  .pvpub{background:var(--ok); color:#fff}
+  .pvpub:disabled{background:rgba(255,255,255,.18); color:rgba(255,255,255,.5); cursor:default}
+  .a4{width:794px; max-width:94vw; margin:26px auto 60px; background:var(--paper); box-shadow:var(--shadow-lg); padding:76px 86px; min-height:1000px}
+  @media(max-width:850px){.a4{padding:44px 30px}}
+  .a4 .doc-title{font-family:var(--hfont); font-weight:700; font-size:29px; line-height:1.25; margin:0 0 6px}
+  .a4 .doc-meta{font-family:var(--ui); font-size:12px; color:var(--grey-dark); margin-bottom:42px}
+  .a4 h2{font-family:var(--hfont); font-weight:700; font-size:19px; margin:34px 0 12px; color:var(--ink); break-after:avoid}
+  .a4 .body{font-family:var(--bfont); font-size:14.5px; line-height:1.78; color:var(--ink)}
+  .a4 .body p{margin:0 0 12px}
+  .a4 .body blockquote{margin:15px 0 15px 26px; padding:2px 0 2px 15px; border-left:3px solid var(--magenta-soft); font-style:italic; font-size:13px; color:var(--ink-soft)}
+  .a4 .body figure{margin:22px auto; max-width:78%; text-align:center; break-inside:avoid}
+  .a4 .body figure img{max-width:100%; display:block; margin:0 auto}
+  .a4 .body figcaption{font-size:11.5px; font-style:italic; color:var(--grey-dark); margin-top:7px}
+  .a4 .bib{font-family:var(--bfont); font-size:12.5px; line-height:1.65}
+  .a4 .bib p{margin:0 0 9px; padding-left:26px; text-indent:-26px}
+  .pvfoot{max-width:794px; margin:-30px auto 50px; font-size:11.5px; color:var(--grey-dark); text-align:center; padding:0 20px}
+
+  @media print{
+    body{background:#fff}
+    .previewbar,#authScreen,#app,.pvbar,.pvfoot,.toast,.panel,.scrim,.pop{display:none !important}
+    #previewScreen{position:static; overflow:visible; background:#fff}
+    .a4{width:auto; max-width:none; margin:0; padding:0; box-shadow:none; min-height:0}
+    @page{size:A4; margin:22mm 24mm}
+  }
+
+  /* ---------- toast ---------- */
+  .toast{position:fixed; left:50%; bottom:30px; transform:translate(-50%,16px); z-index:130; background:var(--ink); color:#F2EFF0;
+    font-size:13px; padding:11px 17px; border-radius:11px; max-width:380px; text-align:center; opacity:0; pointer-events:none;
+    transition:opacity .25s, transform .25s; box-shadow:var(--shadow-lg)}
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+  .foot{margin-top:30px; font-size:12px; color:var(--grey-dark); line-height:1.6; border-top:1px solid var(--grey-light); padding-top:16px}
+</style>
+</head>
+<body>
+
+<!-- ============ sign in ============ -->
+<div class="screen show" id="authScreen">
+  <div class="authcard">
+    <div class="eb">AQA Photography · Component 1</div>
+    <h1>Photo<span>Essay</span></h1>
+    <p class="lead">Write your Personal Investigation essay here. Everything you write lives in a folder in your own Google Drive; this app stores nothing itself.</p>
+    <button class="signin" onclick="signIn()">
+      <span class="gmark"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.7 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.4 13.4 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.4 6.9-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.2C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.6l-7.7-6c-2.1 1.4-4.8 2.3-7.5 2.3-6.3 0-11.6-3.9-13.5-9.3l-7.9 6.2C6.5 42.6 14.6 48 24 48z"/></svg></span>
+      Sign in with Google
+    </button>
+    <div class="autherr" id="authErr"></div>
+    <div class="authfoot">PhotoEssay asks only for permission to manage the files it creates in your Drive (the <b>drive.file</b> scope). It cannot see the rest of your Drive.</div>
+  </div>
+</div>
+
+<!-- ============ workspace ============ -->
+<div class="screen" id="app">
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <div class="eb">AQA Photography · Component 1</div>
+      <div class="nm">Photo<span>Essay</span></div>
+    </div>
+    <div class="who">
+      <div class="sn" id="userName">…</div>
+      <div class="sharerow" id="shareRow"></div>
+      <div class="savestate saved" id="saveState"><span class="pip"></span><span id="saveTxt">Loaded from your Drive</span></div>
+    </div>
+  </div>
+
+  <div class="doctitle" id="docTitle" contenteditable="true" spellcheck="false"></div>
+
+  <div class="miles">
+    <div class="mlab">Milestones · set by your teacher</div>
+    <div id="mhost"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="wc">
+      <div class="wctop"><span><b id="wcNum">0</b> words</span><span id="wcHint"></span></div>
+      <div class="wcbar">
+        <div class="wcband" id="wcBand"></div>
+        <div class="wcfill" id="wcFill"></div>
+      </div>
+    </div>
+    <button class="tbtn" onclick="runProofread()"><span class="ico">✓</span>Proofread</button>
+    <button class="tbtn" id="fbBtn" onclick="openPanel('feedback')"><span class="ico">✉</span>Feedback<span class="dot" id="fbDot" style="display:none"></span></button>
+    <button class="tbtn" onclick="openPanel('style')"><span class="ico">◐</span>Style</button>
+    <button class="tbtn primary" onclick="openPreview()"><span class="ico">▤</span>Preview document</button>
+  </div>
+
+  <div class="signbanner" id="signBanner"></div>
+
+  <div class="aostrip" id="aostrip"></div>
+
+  <div class="sections" id="sections"></div>
+  <button class="addsec" onclick="addSection()">+ Add a section</button>
+
+  <div class="foot">
+    Your essay is a file called <b>essay.json</b> inside the <b>AQA Photography Essay</b> folder of your Google Drive, saved automatically as you write. Your teacher's feedback and sign-off live alongside it in the same folder once you have shared it. Drive keeps a full version history of everything.
+  </div>
+</div>
+</div>
+
+<!-- panels -->
+<div class="scrim" id="scrim" onclick="closePanels()"></div>
+
+<div class="panel" id="stylePanel" role="dialog" aria-label="Essay style">
+  <div class="phead"><h2>Essay style</h2><button class="pclose" onclick="closePanels()" aria-label="Close">✕</button></div>
+  <div class="pbody">
+    <div class="fontgroup"><div class="fglab">Heading font</div><div id="hfonts"></div></div>
+    <div class="fontgroup"><div class="fglab">Body font</div><div id="bfonts"></div></div>
+    <p class="stylenote">Your choice applies to the workspace, the preview and the finished PDF, and is saved with your essay.</p>
+  </div>
+</div>
+
+<div class="panel" id="feedbackPanel" role="dialog" aria-label="Teacher feedback">
+  <div class="phead"><h2>Feedback</h2><button class="pclose" onclick="closePanels()" aria-label="Close">✕</button></div>
+  <div class="pbody" id="fbBody"></div>
+</div>
+
+<!-- proofread popover -->
+<div class="pop" id="pop">
+  <div id="popNote"></div>
+  <div class="popbtns">
+    <button class="pfix" id="popFix">Fix it</button>
+    <button class="pdis" onclick="dismissFlag()">Leave it</button>
+  </div>
+</div>
+
+<!-- preview -->
+<div class="screen" id="previewScreen">
+  <div class="pvbar">
+    <div>
+      <div class="pvt">Document preview</div>
+      <div class="pvsub" id="pvStatus"></div>
+    </div>
+    <div class="pvbtns">
+      <button class="pvback" onclick="closePreview()">← Back to editing</button>
+      <button class="pvsign" id="signBtn" onclick="requestSignoff()">Request sign-off</button>
+      <button class="pvpub" id="pubBtn" onclick="publishPDF()" disabled>Publish PDF</button>
+    </div>
+  </div>
+  <div class="a4" id="a4"></div>
+  <div class="pvfoot" id="pvFoot">Publish PDF unlocks once your teacher approves the essay. It uses your browser's print dialogue: choose "Save as PDF" for a proper vector document with real, selectable text.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="imgInput" accept="image/*" style="display:none">
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* =====================================================================
+   CONFIG — paste your OAuth client ID from the Google Cloud Console here
+   ===================================================================== */
+const CONFIG = {
+  CLIENT_ID: 'PASTE-YOUR-CLIENT-ID-HERE.apps.googleusercontent.com'
+};
+
+const FOLDER_NAME = 'AQA Photography Essay';
+const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE = 'https://www.googleapis.com/drive/v3';
+const UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
+
+/* ============================== app data ============================== */
+
+const AOS = [['AO1','Develop'],['AO2','Experiment'],['AO3','Record'],['AO4','Present']];
+
+const HEADING_FONTS = [
+  ['Playfair Display','"Playfair Display",serif'],
+  ['Cormorant Garamond','"Cormorant Garamond",serif'],
+  ['Quicksand','"Quicksand",sans-serif'],
+  ['Libre Baskerville','"Libre Baskerville",serif'],
+  ['Raleway','"Raleway",sans-serif']
+];
+const BODY_FONTS = [
+  ['Georgia','Georgia,serif'],
+  ['Lora','"Lora",serif'],
+  ['Catamaran','"Catamaran",sans-serif'],
+  ['Merriweather','"Merriweather",serif'],
+  ['EB Garamond','"EB Garamond",serif']
+];
+
+function defaultEssay(){
+  return {
+    title:'',
+    hfont:'Libre Baskerville',
+    bfont:'Georgia',
+    teacherEmail:null,
+    signoffRequestedAt:null,
+    readyMilestones:[],
+    readFeedback:[],
+    sections:[
+      {id:'s1', title:'Introduction / Focus', aos:[], html:'<p></p>'},
+      {id:'s2', title:'Contextual & Historical Background', aos:[], html:'<p></p>'},
+      {id:'s3', title:'Critical Analysis of Artists / Photographers', aos:[], html:'<p></p>'},
+      {id:'s4', title:'Personal Practice & Development', aos:[], html:'<p></p>'},
+      {id:'s5', title:'Reflection & Conclusion', aos:[], html:'<p></p>'}
+    ],
+    bib:[]
+  };
+}
+
+let S = null;              // essay state (student-written)
+let FEEDBACK = [];         // from feedback.json (teacher-written)
+let SIGNOFF = null;        // from signoff.json (teacher-written)
+let MILESTONES = null;     // from milestones.json (teacher-written)
+
+const BIB_TYPES = {
+  book:   { label:'Book', fields:[['author','Author(s)'],['year','Year'],['title','Title'],['place','Place'],['publisher','Publisher']] },
+  journal:{ label:'Journal article', fields:[['author','Author(s)'],['year','Year'],['title','Article title'],['journal','Journal'],['vol','Volume(issue)'],['pages','Pages']] },
+  website:{ label:'Website', fields:[['author','Author / organisation'],['year','Year'],['title','Page title'],['url','URL'],['accessed','Accessed (date)']] },
+  gallery:{ label:'Gallery / museum visit', fields:[['title','Exhibition title'],['year','Year'],['venue','Venue'],['place','City'],['accessed','Visited (date)']] },
+  artist: { label:'Artist study / residency', fields:[['author','Artist'],['year','Year'],['title','Body of work / study'],['place','Context (site, school, residency)']] }
+};
+
+function esc(t){ const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
+
+function harvard(e){
+  const f=e.f, i=t=>'<i>'+esc(t)+'</i>';
+  switch(e.type){
+    case 'book':    return `${esc(f.author)} (${esc(f.year)}) ${i(f.title)}. ${esc(f.place)}: ${esc(f.publisher)}.`;
+    case 'journal': return `${esc(f.author)} (${esc(f.year)}) \u2018${esc(f.title)}\u2019, ${i(f.journal)}, ${esc(f.vol)}, pp. ${esc(f.pages)}.`;
+    case 'website': return `${esc(f.author)} (${esc(f.year)}) ${i(f.title)}. Available at: ${esc(f.url)} (Accessed: ${esc(f.accessed)}).`;
+    case 'gallery': return `${i(f.title)} (${esc(f.year)}) [Exhibition]. ${esc(f.venue)}, ${esc(f.place)}. Visited ${esc(f.accessed)}.`;
+    case 'artist':  return `${esc(f.author)} (${esc(f.year)}) ${i(f.title)}. [Artist study]. ${esc(f.place)}.`;
+  }
+}
+
+/* Basic checks only: common misspellings and slips. Spelling, punctuation
+   and grammar; never content. Whether a fuller checker (e.g. LanguageTool)
+   joins later is an open decision. */
+const PROOF_RULES = [
+  { re:/\bseperate(ly|s|d)?\b/gi, fix:m=>m.replace(/seperate/i,'separate'), note:'Spelling: \u2018separate\u2019. There\u2019s \u2018a rat\u2019 in the middle.' },
+  { re:/\bdefinately\b/gi, fix:()=>'definitely', note:'Spelling: \u2018definitely\u2019, from \u2018finite\u2019.' },
+  { re:/\brecieve(d|s)?\b/gi, fix:m=>m.replace(/recieve/i,'receive'), note:'Spelling: i before e, except after c. \u2018Receive\u2019.' },
+  { re:/\boccured\b/gi, fix:()=>'occurred', note:'Spelling: \u2018occurred\u2019 doubles the r.' },
+  { re:/\balot\b/gi, fix:()=>'a lot', note:'\u2018A lot\u2019 is two words.' },
+  { re:/\b(could|should|would|must) of\b/gi, fix:m=>m.replace(/ of$/i,' have'), note:'This should be \u2018have\u2019, from \u2018could\u2019ve\u2019, which is a contraction of \u2018could have\u2019.' },
+  { re:/\b(\w+) \1\b/gi, fix:m=>m.split(' ')[0], note:'A repeated word.' },
+  { re:/ {2,}/g, fix:()=>' ', note:'A double space.' },
+  { re:/\s+([,.;:!?])/g, fix:m=>m.trim(), note:'A stray space before punctuation.' }
+];
+
+/* ============================== helpers ============================== */
+const $ = id => document.getElementById(id);
+let toastT;
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),4200); }
+
+function applyFonts(){
+  const h=HEADING_FONTS.find(f=>f[0]===S.hfont)||HEADING_FONTS[3];
+  const b=BODY_FONTS.find(f=>f[0]===S.bfont)||BODY_FONTS[0];
+  document.documentElement.style.setProperty('--hfont', h[1]);
+  document.documentElement.style.setProperty('--bfont', b[1]);
+}
+
+/* ============================== auth ============================== */
+let tokenClient=null, accessToken=null;
+window.addEventListener('load', ()=>{
+  const t=setInterval(()=>{
+    if(window.google && google.accounts){
+      clearInterval(t);
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CONFIG.CLIENT_ID,
+        scope: SCOPE,
+        callback: async resp => {
+          if(resp.error){ authError('Sign-in was cancelled or refused ('+resp.error+').'); return; }
+          accessToken = resp.access_token;
+          try { await boot(); }
+          catch(e){ console.error(e); authError('Something went wrong talking to Drive: '+e.message); }
+        }
+      });
+    }
+  }, 100);
+});
+function signIn(){
+  if(location.protocol==='file:'){ authError('Google sign-in will not run from a file:// address. Serve the page over http, e.g. python3 -m http.server 8000, or open the GitHub Pages copy.'); return; }
+  if(CONFIG.CLIENT_ID.startsWith('PASTE')){ authError('No client ID yet. Paste your OAuth client ID into the CONFIG block at the top of this file.'); return; }
+  if(!tokenClient){ authError('Google\u2019s sign-in library has not loaded yet. Give it a second and try again.'); return; }
+  tokenClient.requestAccessToken({prompt:''});
+}
+function authError(msg){ const e=$('authErr'); e.textContent=msg; e.style.display='block'; }
+
+/* ============================== drive layer ============================== */
+async function api(url, opts={}){
+  opts.headers = Object.assign({Authorization:'Bearer '+accessToken}, opts.headers||{});
+  const r = await fetch(url, opts);
+  if(r.status===401){
+    setSave('error','Session expired. Sign in again.');
+    $('authScreen').classList.add('show');
+    throw new Error('Session expired');
+  }
+  if(!r.ok){ const t=await r.text(); throw new Error('Drive '+r.status+': '+t.slice(0,180)); }
+  return r;
+}
+async function driveList(q, fields='files(id,name)'){
+  const r = await api(DRIVE+'/files?q='+encodeURIComponent(q)+'&fields='+encodeURIComponent(fields)+'&pageSize=50');
+  return (await r.json()).files||[];
+}
+async function driveCreateFolder(name){
+  const r = await api(DRIVE+'/files?fields=id', {method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name, mimeType:'application/vnd.google-apps.folder'})});
+  return (await r.json()).id;
+}
+function multipartBody(metadata, content, contentType){
+  const b='photoessay_boundary_7f3';
+  const body = '--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+
+    '\r\n--'+b+'\r\nContent-Type: '+contentType+'\r\n\r\n'+content+'\r\n--'+b+'--';
+  return {body, type:'multipart/related; boundary='+b};
+}
+async function driveCreateJSON(name, parentId, obj){
+  const m = multipartBody({name, parents:[parentId], mimeType:'application/json'}, JSON.stringify(obj), 'application/json');
+  const r = await api(UPLOAD+'/files?uploadType=multipart&fields=id', {method:'POST', headers:{'Content-Type':m.type}, body:m.body});
+  return (await r.json()).id;
+}
+async function driveUpdateJSON(fileId, obj){
+  await api(UPLOAD+'/files/'+fileId+'?uploadType=media', {method:'PATCH',
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj)});
+}
+async function driveReadJSON(fileId){
+  const r = await api(DRIVE+'/files/'+fileId+'?alt=media');
+  return await r.json();
+}
+async function driveUploadImage(file, parentId){
+  const fd = new FormData();
+  fd.append('metadata', new Blob([JSON.stringify({name:file.name, parents:[parentId]})], {type:'application/json'}));
+  fd.append('file', file);
+  const r = await api(UPLOAD+'/files?uploadType=multipart&fields=id', {method:'POST', body:fd});
+  return (await r.json()).id;
+}
+async function driveImageURL(fileId){
+  const r = await api(DRIVE+'/files/'+fileId+'?alt=media');
+  return URL.createObjectURL(await r.blob());
+}
+async function driveShareFolder(folderId, email){
+  await api(DRIVE+'/files/'+folderId+'/permissions?sendNotificationEmail=true', {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({role:'writer', type:'user', emailAddress:email})});
+}
+
+/* ============================== boot ============================== */
+let folderId=null, essayFileId=null;
+const sideFiles={}; // name -> fileId for feedback.json / signoff.json / milestones.json
+
+async function boot(){
+  setSave('saving','Connecting to your Drive\u2026');
+  $('authScreen').classList.remove('show');
+  $('app').classList.add('show');
+
+  // who am I
+  try{
+    const r=await api(DRIVE+'/about?fields=user');
+    const u=(await r.json()).user;
+    $('userName').textContent = u.displayName + ' \u00b7 ' + u.emailAddress;
+  }catch(e){ $('userName').textContent='Signed in'; }
+
+  // folder
+  const folders = await driveList("name='"+FOLDER_NAME+"' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  folderId = folders.length ? folders[0].id : await driveCreateFolder(FOLDER_NAME);
+
+  // essay + teacher-written files
+  const kids = await driveList("'"+folderId+"' in parents and trashed=false");
+  const byName = {}; kids.forEach(k=>byName[k.name]=k.id);
+
+  if(byName['essay.json']){
+    essayFileId = byName['essay.json'];
+    S = Object.assign(defaultEssay(), await driveReadJSON(essayFileId));
+  } else {
+    S = defaultEssay();
+    essayFileId = await driveCreateJSON('essay.json', folderId, S);
+  }
+
+  for(const n of ['feedback.json','signoff.json','milestones.json']){
+    if(byName[n]) sideFiles[n]=byName[n];
+  }
+  try{ if(sideFiles['feedback.json']) FEEDBACK=(await driveReadJSON(sideFiles['feedback.json'])).items||[]; }catch(e){}
+  try{ if(sideFiles['signoff.json']) SIGNOFF=await driveReadJSON(sideFiles['signoff.json']); }catch(e){}
+  try{ if(sideFiles['milestones.json']) MILESTONES=await driveReadJSON(sideFiles['milestones.json']); }catch(e){}
+
+  applyFonts();
+  $('docTitle').textContent = S.title||'';
+  renderMilestones();
+  renderSections();
+  renderSignBanner();
+  updateFbDot();
+  renderShareRow();
+  await hydrateImages();
+  setSave('saved','Loaded from your Drive');
+}
+
+/* ============================== saving ============================== */
+let saveTimer=null, saving=false, dirtyAgain=false;
+function setSave(cls,msg){
+  const s=$('saveState');
+  s.classList.remove('saved','saving','error'); s.classList.add(cls);
+  $('saveTxt').textContent=msg;
+}
+function queueSave(){
+  setSave('saving','Editing\u2026');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveNow, 1600);
+}
+function serializedEssay(){
+  // strip in-session blob URLs; keep the Drive file id on each image
+  const copy = JSON.parse(JSON.stringify(S));
+  copy.sections = S.sections.map(sec=>{
+    const d=document.createElement('div'); d.innerHTML=sec.html;
+    d.querySelectorAll('img[data-drive-id]').forEach(img=>img.removeAttribute('src'));
+    d.querySelectorAll('.flag').forEach(f=>f.outerHTML=f.textContent);
+    return Object.assign({}, sec, {html:d.innerHTML});
+  });
+  return copy;
+}
+async function saveNow(){
+  if(saving){ dirtyAgain=true; return; }
+  saving=true;
+  setSave('saving','Saving to your Drive\u2026');
+  try{
+    await driveUpdateJSON(essayFileId, serializedEssay());
+    setSave('saved','Everything saved to your Drive');
+  }catch(e){
+    console.error(e);
+    setSave('error','Could not save. Check your connection.');
+  }
+  saving=false;
+  if(dirtyAgain){ dirtyAgain=false; queueSave(); }
+}
+
+/* ============================== share with teacher ============================== */
+function renderShareRow(){
+  const el=$('shareRow');
+  if(S.teacherEmail){
+    el.innerHTML='Shared with '+esc(S.teacherEmail)+' \u00b7 <button onclick="shareWithTeacher()">change</button>';
+  } else {
+    el.innerHTML='<button onclick="shareWithTeacher()">Share with your teacher</button> so they can see your progress';
+  }
+}
+async function shareWithTeacher(){
+  const email=prompt('Your teacher\u2019s email address:', S.teacherEmail||'');
+  if(!email) return;
+  try{
+    setSave('saving','Sharing your essay folder\u2026');
+    await driveShareFolder(folderId, email.trim());
+    S.teacherEmail=email.trim();
+    renderShareRow(); queueSave();
+    toast('Folder shared. '+email.trim()+' has been emailed a link and can now see your essay and leave feedback.');
+  }catch(e){
+    setSave('error','Sharing failed.');
+    toast('Drive would not share the folder: '+e.message);
+  }
+}
+
+/* ============================== word count ============================== */
+function sectionWords(sec){
+  const div=document.createElement('div'); div.innerHTML=sec.html;
+  div.querySelectorAll('figcaption').forEach(c=>c.remove());
+  const txt=div.textContent.trim();
+  return txt ? txt.split(/\s+/).length : 0;
+}
+function totalWords(){ return S.sections.reduce((n,s)=>n+sectionWords(s),0); }
+const WC_MAX=3400, WC_LO=1000, WC_HI=3000;
+function renderCount(){
+  const n=totalWords();
+  $('wcNum').textContent=n.toLocaleString();
+  const fill=$('wcFill');
+  fill.style.width=Math.min(100, n/WC_MAX*100)+'%';
+  fill.classList.toggle('inrange', n>=WC_LO && n<=WC_HI);
+  fill.classList.toggle('overrun', n>WC_HI);
+  $('wcBand').style.left=(WC_LO/WC_MAX*100)+'%';
+  $('wcBand').style.width=((WC_HI-WC_LO)/WC_MAX*100)+'%';
+  const hint=$('wcHint');
+  if(n<WC_LO) hint.textContent=(WC_LO-n).toLocaleString()+' more to reach the AQA range (1,000\u20133,000)';
+  else if(n<=WC_HI) hint.textContent='Within the AQA range \u00b7 1,000\u20133,000';
+  else hint.textContent=(n-WC_HI).toLocaleString()+' over the 3,000 limit';
+  S.sections.forEach(sec=>{
+    const el=document.querySelector('[data-count="'+sec.id+'"]');
+    if(el) el.textContent=sectionWords(sec)+' words';
+  });
+}
+
+/* ============================== milestones ============================== */
+function milestoneStatus(m, idx){
+  if(MILESTONES && (MILESTONES.reviewed||[]).includes(idx)) return 'done';
+  const d=new Date(m.date); const now=new Date();
+  if(isNaN(d)) return 'up';
+  const days=(d-now)/86400000;
+  if(days<0) return 'over';
+  if(days<=7) return 'due';
+  return 'up';
+}
+function renderMilestones(){
+  const host=$('mhost');
+  if(!MILESTONES || !(MILESTONES.milestones||[]).length){
+    host.innerHTML='<div class="mempty">No milestones yet. They appear here once your teacher sets them.</div>';
+    return;
+  }
+  const stat={up:['up','Upcoming'],due:['due','Due soon'],over:['over','Overdue'],done:['done','Reviewed']};
+  host.innerHTML='<div class="mtrack">'+MILESTONES.milestones.map((m,i)=>{
+    const s=milestoneStatus(m,i), st=stat[s];
+    const flagged=(S.readyMilestones||[]).includes(i);
+    const ready=(s==='due'||s==='over') ?
+      '<button class="mready'+(flagged?' flagged':'')+'" onclick="markReady('+i+')">'+(flagged?'\u2713 Flagged for review':'Mark ready for review')+'</button>' : '';
+    const dstr=isNaN(new Date(m.date))?esc(m.date):new Date(m.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return '<div class="mnode '+s+'"><span class="bead"></span><div class="mtxt"><div class="mt">'+esc(m.title)+'</div><div class="md">'+dstr+'</div><span class="mstatus '+st[0]+'">'+st[1]+'</span>'+ready+'</div></div>';
+  }).join('')+'</div>';
+}
+function markReady(i){
+  if(!(S.readyMilestones||[]).includes(i)){
+    S.readyMilestones.push(i);
+    renderMilestones(); queueSave();
+    toast('Flagged. Your teacher sees this against your name on their dashboard.');
+  }
+}
+
+/* ============================== AO strip ============================== */
+function renderAOStrip(){
+  const counts={}; AOS.forEach(a=>counts[a[0]]=0);
+  S.sections.forEach(s=>(s.aos||[]).forEach(a=>counts[a]++));
+  $('aostrip').innerHTML='<span class="aolab">AO coverage</span>'+AOS.map(a=>{
+    const c=counts[a[0]];
+    return '<span class="aochip'+(c?'':' zero')+'"><span class="aopip"></span>'+a[0]+' '+a[1]+' <b>'+c+'</b></span>';
+  }).join('')+'<span style="font-style:italic">tag sections below to build coverage across all four</span>';
+}
+
+/* ============================== sections ============================== */
+function renderSections(){
+  const host=$('sections');
+  host.innerHTML='';
+  S.sections.forEach((sec,i)=>{
+    const card=document.createElement('div');
+    card.className='card'; card.dataset.id=sec.id;
+    const fb=FEEDBACK.find(f=>f.section===sec.id && !(S.readFeedback||[]).includes(f.id));
+    card.innerHTML=
+      '<div class="chead">'+
+        '<div class="ctitle" contenteditable="true" spellcheck="false">'+esc(sec.title)+'</div>'+
+        '<div class="cmeta">'+
+          '<span class="cwords" data-count="'+sec.id+'"></span>'+
+          '<button class="iconb" title="Move up" '+(i===0?'disabled':'')+' onclick="moveSection('+i+',-1)">\u2191</button>'+
+          '<button class="iconb" title="Move down" '+(i===S.sections.length-1?'disabled':'')+' onclick="moveSection('+i+',1)">\u2193</button>'+
+          '<button class="iconb" title="Delete section" onclick="deleteSection('+i+')">\u2715</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="aotags">'+AOS.map(a=>'<button class="aot'+((sec.aos||[]).includes(a[0])?' on':'')+'" onclick="toggleAO('+i+',\''+a[0]+'\')">'+a[0]+' '+a[1]+'</button>').join('')+'</div>'+
+      '<div class="editor" contenteditable="true" data-placeholder="Start writing\u2026">'+sec.html+'</div>'+
+      '<div class="ctools">'+
+        '<button class="ctool" onclick="insertImage('+i+')">+ Image with caption (from this device)</button>'+
+        '<button class="ctool" onclick="insertQuote('+i+')">+ Block quote</button>'+
+      '</div>'+
+      (fb ? '<button class="fbchip" onclick="openPanel(\'feedback\')"><span>\u2709</span> Feedback from your teacher on this section</button>' : '');
+    host.appendChild(card);
+
+    const ed=card.querySelector('.editor');
+    ed.addEventListener('input', ()=>{ sec.html=ed.innerHTML; renderCount(); queueSave(); });
+    ed.addEventListener('focus', ()=>{ document.querySelectorAll('.card').forEach(c=>c.classList.remove('active')); card.classList.add('active'); });
+    const tt=card.querySelector('.ctitle');
+    tt.addEventListener('input', ()=>{ sec.title=tt.textContent; queueSave(); });
+    ed.addEventListener('click', e=>{
+      const flag=e.target.closest('.flag');
+      if(flag) showPopover(flag);
+    });
+  });
+  renderBibliography(host);
+  renderCount();
+  renderAOStrip();
+}
+
+$('docTitle').addEventListener('input', ()=>{ S.title=$('docTitle').textContent; queueSave(); });
+
+function moveSection(i,dir){
+  const j=i+dir; if(j<0||j>=S.sections.length) return;
+  [S.sections[i],S.sections[j]]=[S.sections[j],S.sections[i]];
+  renderSections(); hydrateImages(); queueSave();
+}
+function deleteSection(i){
+  if(!confirm('Delete \u2018'+S.sections[i].title+'\u2019 and its writing? Drive keeps old versions of your essay if you change your mind.')) return;
+  S.sections.splice(i,1); renderSections(); hydrateImages(); queueSave();
+}
+function addSection(){
+  S.sections.push({id:'s'+Date.now(), title:'New section', aos:[], html:'<p></p>'});
+  renderSections(); queueSave();
+  const cards=document.querySelectorAll('.card'); const last=cards[cards.length-2]; // last is bibliography
+  if(last){ last.scrollIntoView({behavior:'smooth', block:'center'}); last.querySelector('.ctitle').focus(); }
+}
+function toggleAO(i,ao){
+  const arr=S.sections[i].aos=(S.sections[i].aos||[]);
+  const k=arr.indexOf(ao);
+  if(k>=0) arr.splice(k,1); else arr.push(ao);
+  renderSections(); hydrateImages(); queueSave();
+}
+
+let pendingImageSection=null;
+function insertImage(i){
+  pendingImageSection=i;
+  $('imgInput').value='';
+  $('imgInput').click();
+}
+$('imgInput').addEventListener('change', async e=>{
+  const file=e.target.files[0];
+  if(!file || pendingImageSection===null) return;
+  const i=pendingImageSection; pendingImageSection=null;
+  setSave('saving','Uploading photograph to your Drive\u2026');
+  try{
+    const id=await driveUploadImage(file, folderId);
+    const url=URL.createObjectURL(file);
+    S.sections[i].html+='<figure><img data-drive-id="'+id+'" src="'+url+'" alt="Photograph"><figcaption contenteditable="true">Add a caption\u2026</figcaption></figure><p></p>';
+    renderSections(); await hydrateImages(); queueSave();
+    toast('Photograph uploaded to your essay folder in Drive.');
+  }catch(err){
+    setSave('error','Upload failed.');
+    toast('Drive would not take the upload: '+err.message);
+  }
+});
+function insertQuote(i){
+  S.sections[i].html+='<blockquote>Type or paste the quotation here, then cite it in your bibliography.</blockquote><p></p>';
+  renderSections(); hydrateImages(); queueSave();
+}
+
+const imgCache={};
+async function hydrateImages(){
+  const imgs=[...document.querySelectorAll('img[data-drive-id]')].filter(im=>!im.getAttribute('src'));
+  for(const im of imgs){
+    const id=im.dataset.driveId;
+    try{
+      if(!imgCache[id]) imgCache[id]=await driveImageURL(id);
+      im.src=imgCache[id];
+    }catch(e){ im.alt='(image unavailable)'; }
+  }
+  // write hydrated srcs back into state so re-renders keep them this session
+  document.querySelectorAll('.card[data-id]').forEach(card=>{
+    const sec=S.sections.find(s=>s.id===card.dataset.id);
+    if(sec) sec.html=card.querySelector('.editor').innerHTML;
+  });
+}
+
+/* ============================== bibliography ============================== */
+let bibFormOpen=false, bibType='book';
+function renderBibliography(host){
+  const card=document.createElement('div');
+  card.className='card'; card.id='bibCard';
+  let formHTML='';
+  if(bibFormOpen){
+    const t=BIB_TYPES[bibType];
+    formHTML='<div class="bibform">'+
+      '<div class="bfrow one"><div><label>Source type</label><select onchange="bibType=this.value;renderSections();hydrateImages()">'+
+        Object.keys(BIB_TYPES).map(k=>'<option value="'+k+'"'+(k===bibType?' selected':'')+'>'+BIB_TYPES[k].label+'</option>').join('')+
+      '</select></div></div>'+
+      '<div class="bfrow">'+t.fields.map(f=>'<div><label>'+f[1]+'</label><input id="bf_'+f[0]+'" type="text"></div>').join('')+'</div>'+
+      '<div class="bfbtns"><button class="bcancel" onclick="bibFormOpen=false;renderSections();hydrateImages()">Cancel</button>'+
+      '<button class="bsave" onclick="saveBibEntry()">Add reference</button></div>'+
+    '</div>';
+  }
+  card.innerHTML=
+    '<div class="chead"><div class="ctitle" style="pointer-events:none">Bibliography</div>'+
+    '<div class="cmeta"><span class="cwords">excluded from word count</span></div></div>'+
+    '<ol class="bib-list">'+(S.bib||[]).map((e,i)=>'<li>'+harvard(e)+'<button class="bdel" onclick="S.bib.splice('+i+',1);renderSections();hydrateImages();queueSave()">remove</button></li>').join('')+'</ol>'+
+    (bibFormOpen ? formHTML : '<div class="ctools"><button class="ctool" onclick="bibFormOpen=true;renderSections();hydrateImages()">+ Add a reference</button></div>')+
+    '<div class="bibnote">Choose the source type and PhotoEssay sets out the Harvard format for you.</div>';
+  host.appendChild(card);
+}
+function saveBibEntry(){
+  const t=BIB_TYPES[bibType], f={};
+  let missing=false;
+  t.fields.forEach(fd=>{ const v=$('bf_'+fd[0]).value.trim(); if(!v) missing=true; f[fd[0]]=v; });
+  if(missing){ toast('Fill in every field so the reference is complete.'); return; }
+  S.bib.push({type:bibType, f});
+  bibFormOpen=false; renderSections(); hydrateImages(); queueSave();
+}
+
+/* ============================== proofread ============================== */
+let activeFlag=null;
+function runProofread(){
+  document.querySelectorAll('.flag').forEach(f=>unwrapFlag(f));
+  syncFromDOM(false);
+  let hits=0;
+  S.sections.forEach(sec=>{
+    // work on text nodes only, via a scratch DOM, so tags and attributes stay untouched
+    const d=document.createElement('div'); d.innerHTML=sec.html;
+    const walker=document.createTreeWalker(d, NodeFilter.SHOW_TEXT);
+    const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node=>{
+      if(node.parentElement && node.parentElement.closest('figcaption')) return;
+      let html=esc(node.textContent), changed=false;
+      PROOF_RULES.forEach((r,ri)=>{
+        if(r.re.test(html)){
+          r.re.lastIndex=0;
+          html=html.replace(r.re, m=>{ hits++; changed=true; return '<span class="flag" data-rule="'+ri+'">'+m+'</span>'; });
+        }
+        r.re.lastIndex=0;
+      });
+      if(changed){
+        const span=document.createElement('span'); span.innerHTML=html;
+        node.replaceWith(...span.childNodes);
+      }
+    });
+    sec.html=d.innerHTML;
+  });
+  renderSections(); hydrateImages();
+  if(hits) toast(hits+(hits===1?' thing':' things')+' to look at. Click a highlight to see why. These are basic checks: spelling, punctuation and slips only. Your ideas are your own business.');
+  else toast('Nothing flagged by the basic checks: common misspellings, repeated words, stray spaces. Nothing is ever rewritten for you.');
+}
+function showPopover(flag){
+  activeFlag=flag;
+  const r=PROOF_RULES[+flag.dataset.rule];
+  $('popNote').textContent=r.note;
+  $('popFix').onclick=fixFlag;
+  const rect=flag.getBoundingClientRect();
+  const pop=$('pop');
+  pop.classList.add('show');
+  pop.style.top=(rect.bottom+window.scrollY+8)+'px';
+  pop.style.left=Math.max(12, Math.min(window.innerWidth-274, rect.left+window.scrollX-20))+'px';
+}
+function hidePopover(){ $('pop').classList.remove('show'); activeFlag=null; }
+function fixFlag(){
+  if(!activeFlag) return;
+  const r=PROOF_RULES[+activeFlag.dataset.rule];
+  activeFlag.outerHTML=r.fix(activeFlag.textContent);
+  syncFromDOM(); hidePopover();
+}
+function dismissFlag(){
+  if(!activeFlag) return;
+  unwrapFlag(activeFlag); syncFromDOM(); hidePopover();
+}
+function unwrapFlag(f){ f.outerHTML=f.textContent; }
+function syncFromDOM(save=true){
+  document.querySelectorAll('.card[data-id]').forEach(card=>{
+    const sec=S.sections.find(s=>s.id===card.dataset.id);
+    if(sec) sec.html=card.querySelector('.editor').innerHTML;
+  });
+  renderCount();
+  if(save) queueSave();
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.pop') && !e.target.closest('.flag')) hidePopover();
+});
+
+/* ============================== panels ============================== */
+function openPanel(which){
+  closePanels();
+  $('scrim').classList.add('show');
+  if(which==='style'){ renderStyle(); $('stylePanel').classList.add('show'); }
+  else { renderFeedback(); $('feedbackPanel').classList.add('show'); }
+}
+function closePanels(){
+  $('scrim').classList.remove('show');
+  $('stylePanel').classList.remove('show');
+  $('feedbackPanel').classList.remove('show');
+}
+function renderStyle(){
+  $('hfonts').innerHTML=HEADING_FONTS.map(f=>
+    '<button class="fopt'+(S.hfont===f[0]?' sel':'')+'" onclick="setFont(\'h\',\''+f[0]+'\')"><span class="fprev" style="font-family:'+f[1].replace(/"/g,'&quot;')+'">'+(esc(S.title)||'Your essay title')+'</span><span class="fname">'+f[0]+'</span></button>').join('');
+  $('bfonts').innerHTML=BODY_FONTS.map(f=>
+    '<button class="fopt'+(S.bfont===f[0]?' sel':'')+'" onclick="setFont(\'b\',\''+f[0]+'\')"><span class="fprev" style="font-family:'+f[1].replace(/"/g,'&quot;')+';font-size:15px">The quality of the print depends on the negative</span><span class="fname">'+f[0]+'</span></button>').join('');
+}
+function setFont(which,name){
+  if(which==='h') S.hfont=name; else S.bfont=name;
+  applyFonts(); renderStyle(); queueSave();
+}
+function renderFeedback(){
+  $('fbBody').innerHTML=FEEDBACK.length ? FEEDBACK.map(f=>{
+    const sec=f.section ? S.sections.find(s=>s.id===f.section) : null;
+    const read=(S.readFeedback||[]).includes(f.id);
+    return '<div class="fbcard'+(read?' read':'')+'">'+
+      '<div class="fbwho"><span class="udot"></span>'+esc(f.who||'Your teacher')+' \u00b7 '+esc(f.when||'')+'</div>'+
+      '<div class="fbsec">'+(sec?('On \u2018'+esc(sec.title)+'\u2019'):esc(f.milestone?('Overall \u00b7 '+f.milestone):'Overall'))+'</div>'+
+      '<div class="fbtxt">'+esc(f.text)+'</div>'+
+      '<button class="fbmark" onclick="markRead(\''+esc(f.id)+'\')">Mark as read</button>'+
+    '</div>';
+  }).join('') : '<p class="fbempty">No feedback yet. It appears here when your teacher reviews a milestone or comments on a section.</p>';
+  updateFbDot();
+}
+function markRead(id){
+  if(!(S.readFeedback||[]).includes(id)) S.readFeedback.push(id);
+  renderFeedback(); renderSections(); hydrateImages(); queueSave();
+}
+function updateFbDot(){
+  const unread=FEEDBACK.some(f=>!(S.readFeedback||[]).includes(f.id));
+  $('fbDot').style.display=unread?'block':'none';
+}
+
+/* ============================== sign-off + preview ============================== */
+function signoffState(){
+  if(SIGNOFF && SIGNOFF.status==='approved') return 'approved';
+  if(SIGNOFF && SIGNOFF.status==='returned'
+     && (!S.signoffRequestedAt || new Date(SIGNOFF.at||0) > new Date(S.signoffRequestedAt))) return 'returned';
+  if(S.signoffRequestedAt) return 'requested';
+  return 'none';
+}
+function renderSignBanner(){
+  const b=$('signBanner'); const st=signoffState();
+  b.className='signbanner';
+  if(st==='approved'){
+    b.classList.add('show','approved');
+    b.innerHTML='<b>Signed off.</b> Your teacher has approved the essay'+(SIGNOFF.note?': \u201c'+esc(SIGNOFF.note)+'\u201d':'.')+' Publish PDF is unlocked in the preview.';
+  } else if(st==='returned'){
+    b.classList.add('show','returned');
+    b.innerHTML='<b>Returned with a note.</b> '+esc(SIGNOFF.note||'Your teacher has asked you to look at something before sign-off.');
+  }
+}
+function openPreview(){
+  const a4=$('a4');
+  let html='<h1 class="doc-title">'+(esc(S.title)||'Untitled essay')+'</h1>'+
+    '<div class="doc-meta">AQA Photography Component 1 \u00b7 Personal investigation \u00b7 '+totalWords().toLocaleString()+' words</div>';
+  S.sections.forEach(sec=>{
+    const div=document.createElement('div'); div.innerHTML=sec.html;
+    div.querySelectorAll('.flag').forEach(f=>f.outerHTML=f.textContent);
+    div.querySelectorAll('[contenteditable]').forEach(c=>c.removeAttribute('contenteditable'));
+    html+='<h2>'+esc(sec.title)+'</h2><div class="body">'+div.innerHTML+'</div>';
+  });
+  if((S.bib||[]).length){
+    html+='<h2>Bibliography</h2><div class="bib">'+S.bib.map(e=>'<p>'+harvard(e)+'</p>').join('')+'</div>';
+  }
+  a4.innerHTML=html;
+  const st=signoffState();
+  $('pvStatus').textContent = st==='approved' ? 'Approved by your teacher'
+    : st==='requested' ? 'Awaiting sign-off from your teacher'
+    : st==='returned' ? 'Returned with a note; see your workspace'
+    : 'Sign-off not yet requested';
+  $('signBtn').disabled = (st==='requested'||st==='approved');
+  $('signBtn').textContent = st==='requested' ? 'Sign-off requested' : st==='approved' ? 'Signed off \u2713' : 'Request sign-off';
+  $('pubBtn').disabled = st!=='approved';
+  $('previewScreen').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closePreview(){
+  $('previewScreen').classList.remove('show');
+  document.body.style.overflow='';
+}
+function requestSignoff(){
+  if(!S.teacherEmail){ toast('Share your essay folder with your teacher first (top right of the workspace).'); return; }
+  S.signoffRequestedAt=new Date().toISOString();
+  queueSave();
+  $('pvStatus').textContent='Awaiting sign-off from your teacher';
+  $('signBtn').disabled=true; $('signBtn').textContent='Sign-off requested';
+  toast('Requested. Your teacher will see it next time they open their dashboard.');
+}
+function publishPDF(){
+  toast('Choose \u201cSave as PDF\u201d in the print dialogue.');
+  setTimeout(()=>window.print(), 400);
+}
+</script>
+</body>
+</html>
