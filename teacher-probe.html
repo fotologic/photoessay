@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoEssay teacher probe</title>
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:#FFF6F3; color:#3A3A40; max-width:760px; margin:0 auto; padding:40px 24px; line-height:1.55}
+  h1{font-size:22px; font-weight:700}
+  .lead{color:#6C6C74; font-size:14px}
+  button{font-size:14px; font-weight:600; background:#3A3A40; color:#fff; border:0; border-radius:10px; padding:12px 20px; cursor:pointer}
+  button:hover{background:#2B2B30}
+  #log{margin-top:24px; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; background:#fff; border:1px solid #E0DAD5; border-radius:12px; padding:18px 20px; white-space:pre-wrap; line-height:1.6}
+  .ok{color:#1F7A47} .bad{color:#B0154F} .dim{color:#8A8A90}
+  .step{margin:2px 0}
+</style>
+</head>
+<body>
+  <h1>Teacher access probe</h1>
+  <p class="lead">One question only: can a teacher session read a student's essay Doc, shared as a folder, through the Docs API? Sign in as the teacher account a student has shared with (jonportfolio).</p>
+  <button onclick="signIn()">Sign in with Google</button>
+  <div id="log"></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+const CLIENT_ID='1061675050152-1b4mn398mth6a3hfim1o0p8uktpqokr3.apps.googleusercontent.com';
+const SCOPE='https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents.readonly';
+const DRIVE='https://www.googleapis.com/drive/v3';
+const DOCS='https://docs.googleapis.com/v1/documents';
+const FOLDER_NAME='AQA Photography Essay';
+const $=id=>document.getElementById(id);
+let accessToken=null, tokenClient=null;
+
+function log(msg, cls){ const d=document.createElement('div'); d.className='step'+(cls?' '+cls:''); d.textContent=msg; $('log').appendChild(d); }
+
+window.addEventListener('load',()=>{
+  const t=setInterval(()=>{
+    if(window.google&&google.accounts){
+      clearInterval(t);
+      tokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID, scope:SCOPE,
+        callback:async resp=>{
+          if(resp.error){ log('Sign-in refused: '+resp.error,'bad'); return; }
+          accessToken=resp.access_token;
+          try{ await probe(); }catch(e){ log('Stopped: '+e.message,'bad'); }
+        }
+      });
+    }
+  },100);
+});
+function signIn(){ if(!tokenClient){ log('Google library not loaded yet, try again in a second.','bad'); return; } $('log').innerHTML=''; tokenClient.requestAccessToken({prompt:''}); }
+
+async function api(url){
+  const r=await fetch(url,{headers:{Authorization:'Bearer '+accessToken}});
+  if(!r.ok){ const t=await r.text(); const e=new Error(r.status+': '+t.slice(0,200)); e.status=r.status; throw e; }
+  return r.json();
+}
+
+async function probe(){
+  // who am i
+  const me=await api(DRIVE+'/about?fields=user');
+  log('Signed in as '+me.user.emailAddress,'ok');
+
+  // folders shared with me named AQA Photography Essay
+  log('Looking for shared "'+FOLDER_NAME+'" folders\u2026','dim');
+  const q="name='"+FOLDER_NAME+"' and mimeType='application/vnd.google-apps.folder' and sharedWithMe=true and trashed=false";
+  const fr=await api(DRIVE+'/files?q='+encodeURIComponent(q)+'&fields=files(id,name,owners(displayName,emailAddress))&pageSize=50');
+  const folders=fr.files||[];
+  if(!folders.length){ log('No shared folders found. Has a student shared their folder with this account? (It can take a minute after sharing.)','bad'); return; }
+  log('Found '+folders.length+' shared folder(s).','ok');
+
+  // for the first folder, list its docs
+  const f=folders[0];
+  const owner=(f.owners&&f.owners[0])||{};
+  log('\nUsing folder from: '+(owner.displayName||owner.emailAddress||'unknown'),'dim');
+  const kidsQ="'"+f.id+"' in parents and trashed=false";
+  const kr=await api(DRIVE+'/files?q='+encodeURIComponent(kidsQ)+'&fields=files(id,name,mimeType)&pageSize=50');
+  const kids=kr.files||[];
+  log('Folder contains '+kids.length+' item(s): '+kids.map(k=>k.name).join(', '),'dim');
+
+  const doc=kids.find(k=>k.mimeType==='application/vnd.google-apps.document');
+  if(!doc){ log('No Google Doc in the folder. Has the student\u2019s app authored the essay yet?','bad'); return; }
+  log('Found essay Doc: "'+doc.name+'"','ok');
+
+  // THE test: read it through the Docs API
+  log('\nAttempting to read it through the Docs API\u2026','dim');
+  try{
+    const d=await api(DOCS+'/'+doc.id);
+    const paras=((d.body&&d.body.content)||[]).filter(e=>e.paragraph).length;
+    log('SUCCESS. The Docs API returned the document ('+paras+' paragraphs, title "'+(d.title||'')+'").','ok');
+    log('\nThe teacher view is viable. A shared folder grants Docs-API read access.','ok');
+  }catch(e){
+    if(e.status===403||e.status===404){
+      log('BLOCKED. The Docs API refused ('+e.status+'). "Shared with me" does not grant Docs-API read under this scope.','bad');
+      log('\nThis is the thing we needed to know. The teacher view cannot read the Doc this way, and we need another route (e.g. the student app granting the teacher explicit file access, or a different sharing mechanism).','bad');
+    } else {
+      log('Unexpected error: '+e.message,'bad');
+    }
+  }
+}
+</script>
+</body>
+</html>
