@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoEssay · 13A/Pg1</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta:#D02070; --magenta-ink:#8A0F47;
+    --ink:#3A3A40; --ink-soft:#55555C; --grey:#A8A8B0; --grey-dark:#6C6C74; --grey-light:#E2E0E2;
+    --blush:#FFF6F3; --paper:#FFFFFF; --line:#ECE8E8;
+    --field:#2E6C88; --dark:#8A3560;
+    --ui:"Inter",system-ui,sans-serif; --serif:"Libre Baskerville",Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--blush); color:var(--ink); font-family:var(--ui); font-size:14px; line-height:1.5}
+  .wrap{max-width:940px; margin:0 auto; padding:26px 24px 80px}
+
+  header{display:flex; align-items:baseline; gap:14px; padding-bottom:20px; border-bottom:1px solid var(--line)}
+  header .eb{font-size:10px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--grey-dark)}
+  header h1{font-family:var(--serif); font-weight:700; font-size:21px; margin:2px 0 0}
+  header .who{margin-left:auto; font-size:12px; color:var(--grey-dark); text-align:right}
+
+  .meta{display:flex; gap:22px; margin:18px 0 8px; font-size:12.5px; color:var(--grey-dark)}
+  .meta b{color:var(--ink); font-weight:600}
+
+  /* register table */
+  table{width:100%; border-collapse:collapse; margin-top:10px}
+  thead th{font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--grey-dark);
+    text-align:right; padding:10px 12px; border-bottom:1px solid var(--grey-light); white-space:nowrap; cursor:pointer; user-select:none}
+  thead th:first-child{text-align:left}
+  thead th:hover{color:var(--magenta)}
+  thead th .ar{opacity:.4; font-size:9px}
+  tbody td{padding:13px 12px; border-bottom:1px solid var(--line); text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-soft)}
+  tbody td:first-child{text-align:left}
+  tbody tr:hover{background:#fff}
+  .nm{font-weight:600; color:var(--ink); font-size:14px; background:none; border:0; font-family:inherit; cursor:pointer; padding:0; text-align:left}
+  .nm:hover{color:var(--magenta); text-decoration:underline}
+  .nm .sub{display:block; font-weight:400; font-size:11px; color:var(--grey-dark); text-decoration:none}
+  td.wc b{color:var(--ink); font-weight:600; font-size:15px}
+  .flag{color:var(--magenta-ink); font-weight:600}
+  .none{color:var(--grey); font-style:italic; font-weight:400}
+  .edited{font-size:12px}
+  .stale{color:var(--magenta-ink)}
+  .notshared td{color:var(--grey)}
+  .notshared .nm{color:var(--grey)}
+  .chip{display:inline-block; font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:999px; background:#F1EEF5; color:#4A3A6B}
+  .chip.await{background:#FBECEC; color:var(--magenta-ink)}
+
+  .note{margin-top:22px; font-size:12px; color:var(--grey-dark); font-style:italic; line-height:1.6; max-width:60ch}
+
+  /* student rhythm overlay */
+  #layer{position:fixed; inset:0; background:rgba(40,38,44,.34); display:none; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto}
+  #layer.show{display:flex}
+  .sheet{background:var(--paper); border-radius:18px; max-width:660px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.24); padding:32px 34px 30px}
+  .sheet .top{display:flex; align-items:baseline; gap:12px; border-bottom:1px solid var(--line); padding-bottom:16px}
+  .sheet .top h2{font-family:var(--serif); font-weight:700; font-size:20px; margin:0}
+  .sheet .top .em{font-size:12px; color:var(--grey-dark)}
+  .sheet .close{margin-left:auto; border:0; background:none; font-size:22px; color:var(--grey); cursor:pointer; line-height:1}
+  .sheet .close:hover{color:var(--ink)}
+
+  .rhythm{margin:22px 0 6px}
+  .rhythm .cap{font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--grey-dark); margin-bottom:12px}
+  .wave{width:100%; height:120px; display:block}
+  .axis{display:flex; justify-content:space-between; font-size:10.5px; color:var(--grey); margin-top:6px}
+  .rlead{font-family:var(--serif); font-size:14px; line-height:1.6; color:var(--ink-soft); margin:16px 0 0; font-style:italic}
+
+  .facts{display:grid; grid-template-columns:1fr 1fr; gap:10px 26px; margin-top:24px; padding-top:20px; border-top:1px solid var(--line)}
+  .facts .f{display:flex; justify-content:space-between; font-size:13px; padding:4px 0}
+  .facts .f span{color:var(--grey-dark)}
+  .facts .f b{color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+  .sheetnote{margin-top:22px; font-size:12px; color:var(--grey-dark); font-style:italic; line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eb">PhotoEssay · Teacher</div>
+      <h1>13A/Pg1 &middot; Personal Investigation</h1>
+    </div>
+    <div class="who">Mr Nicholls<br><span style="color:var(--grey)">21 students · 18 shared with you</span></div>
+  </header>
+
+  <div class="meta">
+    <div><b>21</b> on the register</div>
+    <div><b>18</b> have shared</div>
+    <div><b>3</b> not yet shared</div>
+    <div style="margin-left:auto">read just now</div>
+  </div>
+
+  <table id="reg">
+    <thead>
+      <tr>
+        <th onclick="return false">Student <span class="ar">▲</span></th>
+        <th>Words</th>
+        <th>Images</th>
+        <th>Bib.</th>
+        <th>Notes left</th>
+        <th>Last edited</th>
+        <th>Sign-off</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="notshared">
+        <td><button class="nm" onclick="event.stopPropagation()">Jesse Absolom<span class="sub none">has not shared a folder</span></button></td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td class="edited">—</td><td></td>
+      </tr>
+      <tr onclick="openStudent('ahmed')">
+        <td><button class="nm">Yousef Ahmed<span class="sub">The barber&rsquo;s shop, ritual</span></button></td>
+        <td class="wc"><b>1,760</b></td><td>5</td><td>14</td><td>1</td>
+        <td class="edited">yesterday</td><td></td>
+      </tr>
+      <tr onclick="openStudent('amoo')">
+        <td><button class="nm">Irene Amoo<span class="sub">Market stalls, hands</span></button></td>
+        <td class="wc"><b>1,480</b></td><td>4</td><td>12</td><td>1</td>
+        <td class="edited">2 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('angeles')">
+        <td><button class="nm">Aaron Angeles<span class="sub">Skateboarders, the undercroft</span></button></td>
+        <td class="wc"><b>980</b></td><td>3</td><td>7</td><td>3</td>
+        <td class="edited">6 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('chambers')">
+        <td><button class="nm">Bea Chambers<span class="sub">Greenhouses, cultivation</span></button></td>
+        <td class="wc"><b>1,240</b></td><td>4</td><td>10</td><td>2</td>
+        <td class="edited">3 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('colston')">
+        <td><button class="nm">Jack Colston<span class="sub">Rush-hour crowds, blur</span></button></td>
+        <td class="wc"><b>670</b></td><td>2</td><td>4</td><td>4</td>
+        <td class="edited">yesterday</td><td></td>
+      </tr>
+      <tr onclick="openStudent('cooperlaw')">
+        <td><button class="nm">Caitlin Cooper-Law<span class="sub">Wedding dresses, the shop</span></button></td>
+        <td class="wc"><b>1,350</b></td><td>4</td><td>11</td><td>1</td>
+        <td class="edited">4 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('caynes')">
+        <td><button class="nm">Ava De Freitas Caynes<span class="sub">Carnival, costume</span></button></td>
+        <td class="wc"><b>1,900</b></td><td>6</td><td>15</td><td>0</td>
+        <td class="edited">yesterday</td><td></td>
+      </tr>
+      <tr onclick="openStudent('godden')">
+        <td><button class="nm">George Godden<span class="sub">Football terraces, belonging</span></button></td>
+        <td class="wc"><b>2,010</b></td><td>7</td><td>16</td><td>0</td>
+        <td class="edited">yesterday</td><td><span class="chip await">requested</span></td>
+      </tr>
+      <tr onclick="openStudent('golding')">
+        <td><button class="nm">Tilly Golding<span class="sub">Seaside towns out of season</span></button></td>
+        <td class="wc"><b>1,390</b></td><td>4</td><td>12</td><td>1</td>
+        <td class="edited">4 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('harber')">
+        <td><button class="nm">Taylor Harber<span class="sub">The night shift, work</span></button></td>
+        <td class="wc"><b>820</b></td><td>2</td><td>6</td><td>3</td>
+        <td class="edited">6 days ago</td><td></td>
+      </tr>
+      <tr class="notshared">
+        <td><button class="nm" onclick="event.stopPropagation()">Emily Lines<span class="sub none">has not shared a folder</span></button></td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td class="edited">—</td><td></td>
+      </tr>
+      <tr onclick="openStudent('lofters')">
+        <td><button class="nm">Na&rsquo;ima Lofters<span class="sub">Hair, portraiture, identity</span></button></td>
+        <td class="wc"><b>1,880</b></td><td>6</td><td>15</td><td>0</td>
+        <td class="edited">2 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('mackenzie')">
+        <td><button class="nm">Alesha Mackenzie<span class="sub">Rivers, edgeland water</span></button></td>
+        <td class="wc"><b>1,150</b></td><td>3</td><td>9</td><td>2</td>
+        <td class="edited">yesterday</td><td></td>
+      </tr>
+      <tr onclick="openStudent('mancini')">
+        <td><button class="nm">Laura Mancini<span class="sub">The family table, still life</span></button></td>
+        <td class="wc"><b>1,420</b></td><td>5</td><td>11</td><td><span class="flag">5</span></td>
+        <td class="edited stale">18 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('mullins')">
+        <td><button class="nm">Evie Mullins<span class="sub">Fairgrounds, light at night</span></button></td>
+        <td class="wc"><b>560</b></td><td>1</td><td>3</td><td>4</td>
+        <td class="edited">yesterday</td><td></td>
+      </tr>
+      <tr onclick="openStudent('potter')">
+        <td><button class="nm">Arthur Potter<span class="sub">Allotments, the plot</span></button></td>
+        <td class="wc"><b>1,300</b></td><td>4</td><td>10</td><td>1</td>
+        <td class="edited">5 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('rooney')">
+        <td><button class="nm">Caitlin Rooney<span class="sub">Empty swimming pools</span></button></td>
+        <td class="wc"><b>1,010</b></td><td>3</td><td>7</td><td>2</td>
+        <td class="edited">2 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('tang')">
+        <td><button class="nm">Katie Tang<span class="sub">Shop windows, reflection</span></button></td>
+        <td class="wc"><b>1,650</b></td><td>5</td><td>13</td><td>0</td>
+        <td class="edited">3 days ago</td><td></td>
+      </tr>
+      <tr onclick="openStudent('yates')">
+        <td><button class="nm">Theodore Yates<span class="sub">Motorway service stations</span></button></td>
+        <td class="wc"><b>740</b></td><td>2</td><td>5</td><td>3</td>
+        <td class="edited">8 days ago</td><td></td>
+      </tr>
+      <tr class="notshared">
+        <td><button class="nm" onclick="event.stopPropagation()">Hannah Yemane<span class="sub none">has not shared a folder</span></button></td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td class="edited">—</td><td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="note">Everything here is read from each student's Google Doc: a word count, a date, a tally. Nothing is a judgement. The notes-left column counts bracketed prompts still in the document. A name in grey is a student on the register who has not yet shared their folder. Choose a name to see the rhythm of their work over the term, which is for talking with them about, not for marking.</p>
+</div>
+
+<!-- student rhythm layer -->
+<div id="layer" onclick="if(event.target===this)closeStudent()">
+  <div class="sheet">
+    <div class="top">
+      <div>
+        <h2 id="sName">—</h2>
+        <div class="em" id="sSub">—</div>
+      </div>
+      <button class="close" onclick="closeStudent()">×</button>
+    </div>
+
+    <div class="rhythm">
+      <div class="cap">The rhythm of the work · September to now</div>
+      <svg class="wave" id="wave" viewBox="0 0 620 120" preserveAspectRatio="none"></svg>
+      <div class="axis"><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span></div>
+    </div>
+
+    <div class="facts" id="sFacts"></div>
+    <p class="sheetnote">Each bar is how much the document grew in that week, read from its edit history. The shape is a way in to a conversation about how someone works, not a measure of how well. There is no rhythm this is meant to look like.</p>
+  </div>
+</div>
+
+<script>
+// invented cohort data: weekly growth (words added per week, Sep..Jan ~ 20 weeks)
+const STU = {"ahmed": {"name": "Yousef Ahmed", "sub": "The barber's shop, ritual", "words": 1760, "img": 5, "bib": 14, "notes": 1, "edited": "yesterday", "weeks": [143, 88, 76, 0, 63, 95, 93, 77, 105, 130, 145, 141, 104, 148, 116, 128, 82, 107, 110, 130]}, "amoo": {"name": "Irene Amoo", "sub": "Market stalls, hands", "words": 1480, "img": 4, "bib": 12, "notes": 1, "edited": "2 days ago", "weeks": [84, 69, 109, 0, 88, 141, 92, 85, 126, 150, 87, 134, 105, 83, 147, 81, 0, 116, 127, 0]}, "angeles": {"name": "Aaron Angeles", "sub": "Skateboarders, the undercroft", "words": 980, "img": 3, "bib": 7, "notes": 3, "edited": "6 days ago", "weeks": [0, 0, 0, 300, 0, 0, 0, 0, 189, 199, 0, 0, 0, 313, 0, 0, 0, 0, 0, 273]}, "chambers": {"name": "Bea Chambers", "sub": "Greenhouses, cultivation", "words": 1240, "img": 4, "bib": 10, "notes": 2, "edited": "3 days ago", "weeks": [70, 83, 87, 104, 80, 74, 78, 61, 48, 60, 69, 59, 43, 50, 49, 33, 0, 0, 0, 0]}, "colston": {"name": "Jack Colston", "sub": "Rush-hour crowds, blur", "words": 670, "img": 2, "bib": 4, "notes": 4, "edited": "yesterday", "weeks": [0, 0, 0, 77, 55, 62, 89, 55, 77, 58, 67, 53, 81, 62, 67, 42, 60, 65, 69, 45]}, "cooperlaw": {"name": "Caitlin Cooper-Law", "sub": "Wedding dresses, the shop", "words": 1350, "img": 4, "bib": 11, "notes": 1, "edited": "4 days ago", "weeks": [0, 0, 84, 102, 0, 78, 107, 99, 97, 0, 122, 65, 76, 101, 60, 71, 69, 66, 126, 84]}, "caynes": {"name": "Ava De Freitas Caynes", "sub": "Carnival, costume", "words": 1900, "img": 6, "bib": 15, "notes": 0, "edited": "yesterday", "weeks": [130, 138, 128, 129, 107, 0, 0, 127, 102, 80, 65, 0, 120, 79, 127, 0, 88, 107, 112, 134]}, "godden": {"name": "George Godden", "sub": "Football terraces, belonging", "words": 2010, "img": 7, "bib": 16, "notes": 0, "edited": "yesterday", "weeks": [84, 84, 0, 124, 60, 70, 133, 87, 63, 147, 143, 0, 88, 91, 133, 143, 127, 90, 72, 119]}, "golding": {"name": "Tilly Golding", "sub": "Seaside towns out of season", "words": 1390, "img": 4, "bib": 12, "notes": 1, "edited": "4 days ago", "weeks": [110, 107, 95, 93, 86, 79, 62, 55, 72, 63, 43, 57, 52, 45, 47, 45, 0, 0, 0, 0]}, "harber": {"name": "Taylor Harber", "sub": "The night shift, work", "words": 820, "img": 2, "bib": 6, "notes": 3, "edited": "6 days ago", "weeks": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 197, 266, 0, 314, 251, 0, 293, 0]}, "lofters": {"name": "Na’ima Lofters", "sub": "Hair, portraiture, identity", "words": 1880, "img": 6, "bib": 15, "notes": 0, "edited": "2 days ago", "weeks": [86, 134, 0, 98, 117, 132, 70, 78, 127, 61, 74, 130, 100, 80, 67, 144, 149, 0, 74, 0]}, "mackenzie": {"name": "Alesha Mackenzie", "sub": "Rivers, edgeland water", "words": 1150, "img": 3, "bib": 9, "notes": 2, "edited": "yesterday", "weeks": [71, 99, 93, 96, 72, 80, 0, 0, 88, 73, 65, 77, 121, 75, 0, 149, 0, 117, 0, 140]}, "mancini": {"name": "Laura Mancini", "sub": "The family table, still life", "words": 1420, "img": 5, "bib": 11, "notes": 5, "edited": "18 days ago", "weeks": [143, 120, 106, 122, 82, 81, 79, 67, 44, 42, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "mullins": {"name": "Evie Mullins", "sub": "Fairgrounds, light at night", "words": 560, "img": 1, "bib": 3, "notes": 4, "edited": "yesterday", "weeks": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 32, 47, 58, 77, 83, 100, 126, 132]}, "potter": {"name": "Arthur Potter", "sub": "Allotments, the plot", "words": 1300, "img": 4, "bib": 10, "notes": 1, "edited": "5 days ago", "weeks": [88, 68, 100, 76, 76, 67, 74, 64, 75, 63, 58, 61, 47, 46, 47, 42, 0, 0, 0, 0]}, "rooney": {"name": "Caitlin Rooney", "sub": "Empty swimming pools", "words": 1010, "img": 3, "bib": 7, "notes": 2, "edited": "2 days ago", "weeks": [131, 90, 123, 65, 118, 116, 132, 111, 132, 64, 0, 0, 111, 118, 0, 70, 67, 141, 63, 119]}, "tang": {"name": "Katie Tang", "sub": "Shop windows, reflection", "words": 1650, "img": 5, "bib": 13, "notes": 0, "edited": "3 days ago", "weeks": [94, 87, 66, 73, 92, 77, 58, 55, 75, 75, 47, 41, 40, 45, 35, 47, 0, 0, 0, 0]}, "yates": {"name": "Theodore Yates", "sub": "Motorway service stations", "words": 740, "img": 2, "bib": 5, "notes": 3, "edited": "8 days ago", "weeks": [40, 0, 0, 44, 0, 64, 0, 0, 0, 0, 68, 0, 68, 78, 0, 55, 73, 76, 44, 67]}};
+
+function drawWave(weeks){
+  const W=620,H=120, n=weeks.length, gap=4, bw=(W-(n-1)*gap)/n;
+  const max=Math.max(...weeks,1);
+  let s='';
+  weeks.forEach((v,i)=>{
+    const h=Math.max(2, v/max*(H-10));
+    const x=i*(bw+gap), y=H-h;
+    const col = v===0 ? '#ECE8E8' : '#2E6C88';
+    s+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${col}"/>`;
+  });
+  return s;
+}
+function openStudent(key){
+  const s=STU[key]; if(!s) return;
+  document.getElementById('sName').textContent=s.name;
+  document.getElementById('sSub').textContent=s.sub;
+  document.getElementById('wave').innerHTML=drawWave(s.weeks);
+  document.getElementById('sFacts').innerHTML=
+    `<div class="f"><span>Words</span><b>${s.words.toLocaleString()}</b></div>`+
+    `<div class="f"><span>Images</span><b>${s.img}</b></div>`+
+    `<div class="f"><span>Bibliography</span><b>${s.bib} entries</b></div>`+
+    `<div class="f"><span>Notes still in</span><b>${s.notes}</b></div>`+
+    `<div class="f"><span>Last edited</span><b>${s.edited}</b></div>`+
+    `<div class="f"><span>Shared with</span><b>you & Ms Minnicucci</b></div>`;
+  document.getElementById('layer').classList.add('show');
+}
+function closeStudent(){ document.getElementById('layer').classList.remove('show'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeStudent(); });
+</script>
+</body>
+</html>
