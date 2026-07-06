@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoEssay · Teacher</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta:#D02070; --magenta-hover:#A8185A; --magenta-soft:#E25A93; --magenta-ink:#8A0F47;
+    --ink:#3A3A40; --ink-soft:#55555C; --grey:#A8A8B0; --grey-dark:#6C6C74; --grey-light:#E2E0E2;
+    --blush:#FFF6F3; --paper:#FFFFFF; --line:#ECE8E8;
+    --field:#2E6C88; --dark:#8A3560; --ok:#2E8B57;
+    --ui:"Inter",system-ui,sans-serif; --serif:"Libre Baskerville",Georgia,serif;
+    --shadow:0 1px 2px rgba(58,58,64,.05),0 6px 18px rgba(58,58,64,.06);
+    --shadow-lg:0 12px 40px rgba(58,58,64,.14);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--blush); color:var(--ink); font-family:var(--ui); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
+  button{font-family:inherit; cursor:pointer}
+  .wrap{max-width:940px; margin:0 auto; padding:26px 24px 80px}
+  .screen{display:none} .screen.show{display:block}
+
+  #auth.show{display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px}
+  .authcard{max-width:440px; background:var(--paper); border:1px solid var(--grey-light); border-radius:18px; box-shadow:var(--shadow-lg); padding:38px 34px 28px; text-align:center}
+  .authcard .eb{font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--grey-dark)}
+  .authcard h1{font-family:var(--serif); font-weight:700; font-size:30px; margin:6px 0 8px}
+  .authcard h1 span{color:var(--magenta)}
+  .authcard .lead{font-size:13.5px; color:var(--grey-dark); line-height:1.55; margin:0 auto 22px; max-width:330px}
+  .signin{width:100%; display:flex; align-items:center; justify-content:center; gap:11px; background:var(--ink); color:#fff; border:0; border-radius:13px; padding:14px; font-weight:700; font-size:15px}
+  .signin:hover{background:#2B2B30}
+  .autherr{margin-top:14px; font-size:12.5px; color:var(--magenta-ink); background:#FBECEC; border:1px solid #F7DEDE; border-radius:9px; padding:10px 12px; display:none; text-align:left}
+
+  #loading.show{display:flex; min-height:100vh; align-items:center; justify-content:center; flex-direction:column; gap:16px}
+  .spin{width:32px; height:32px; border:3px solid #F7DEDE; border-top-color:var(--magenta); border-radius:50%; animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loadMsg{font-size:13px; color:var(--grey-dark)}
+
+  header{display:flex; align-items:baseline; gap:14px; padding-bottom:18px; border-bottom:1px solid var(--line)}
+  header .eb{font-size:10px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--grey-dark)}
+  header h1{font-family:var(--serif); font-weight:700; font-size:21px; margin:2px 0 0}
+  header .who{margin-left:auto; font-size:12px; color:var(--grey-dark); text-align:right}
+
+  .meta{display:flex; gap:22px; margin:18px 0 8px; font-size:12.5px; color:var(--grey-dark); flex-wrap:wrap; align-items:center}
+  .meta b{color:var(--ink); font-weight:600}
+  .meta .refresh{margin-left:auto; color:var(--magenta); background:none; border:0; font-weight:600; font-size:12.5px; cursor:pointer}
+
+  table{width:100%; border-collapse:collapse; margin-top:10px}
+  thead th{font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--grey-dark); text-align:right; padding:10px 12px; border-bottom:1px solid var(--grey-light); white-space:nowrap; cursor:pointer; user-select:none}
+  thead th:first-child{text-align:left}
+  thead th:hover{color:var(--magenta)}
+  thead th .ar{font-size:9px; color:var(--magenta)}
+  tbody td{padding:13px 12px; border-bottom:1px solid var(--line); text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-soft)}
+  tbody td:first-child{text-align:left}
+  tbody tr.clickable:hover{background:#fff; cursor:pointer}
+  .nm{font-weight:600; color:var(--ink); font-size:14px; background:none; border:0; font-family:inherit; cursor:pointer; padding:0; text-align:left}
+  .nm:hover{color:var(--magenta)}
+  .nm .sub{display:block; font-weight:400; font-size:11px; color:var(--grey-dark)}
+  td.wc b{color:var(--ink); font-weight:600; font-size:15px}
+  .flag{color:var(--magenta-ink); font-weight:600}
+  .stale{color:var(--magenta-ink)}
+  .notshared td{color:var(--grey)}
+  .notshared .nm{color:var(--grey)}
+  .notshared .sub{color:var(--grey); font-style:italic}
+  .chip{display:inline-block; font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:999px; background:#F1EEF5; color:#4A3A6B}
+  .chip.await{background:#FBECEC; color:var(--magenta-ink)}
+  .note{margin-top:22px; font-size:12px; color:var(--grey-dark); font-style:italic; line-height:1.6; max-width:64ch}
+  .empty{margin-top:40px; text-align:center; color:var(--grey-dark); font-size:14px; line-height:1.7}
+
+  #layer{position:fixed; inset:0; background:rgba(40,38,44,.34); display:none; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; z-index:50}
+  #layer.show{display:flex}
+  .sheet{background:var(--paper); border-radius:18px; max-width:660px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.24); padding:32px 34px 30px}
+  .sheet .top{display:flex; align-items:baseline; gap:12px; border-bottom:1px solid var(--line); padding-bottom:16px}
+  .sheet .top h2{font-family:var(--serif); font-weight:700; font-size:20px; margin:0}
+  .sheet .top .em{font-size:12px; color:var(--grey-dark)}
+  .sheet .top a{margin-left:auto; font-size:12px; font-weight:600; color:var(--magenta); text-decoration:none}
+  .sheet .close{border:0; background:none; font-size:22px; color:var(--grey); cursor:pointer; line-height:1; padding-left:14px}
+  .sheet .close:hover{color:var(--ink)}
+  .rhythm{margin:22px 0 6px}
+  .rhythm .cap{font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--grey-dark); margin-bottom:12px}
+  .wave{width:100%; height:120px; display:block}
+  .axis{display:flex; justify-content:space-between; font-size:10.5px; color:var(--grey); margin-top:6px}
+  .rnodata{color:var(--grey); font-size:13px; font-style:italic; padding:30px 0; text-align:center; line-height:1.6}
+  .facts{display:grid; grid-template-columns:1fr 1fr; gap:10px 26px; margin-top:24px; padding-top:20px; border-top:1px solid var(--line)}
+  .facts .f{display:flex; justify-content:space-between; font-size:13px; padding:4px 0}
+  .facts .f span{color:var(--grey-dark)}
+  .facts .f b{color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+  .sheetnote{margin-top:22px; font-size:12px; color:var(--grey-dark); font-style:italic; line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="screen show" id="auth">
+  <div class="authcard">
+    <div class="eb">PhotoEssay · Teacher</div>
+    <h1>Photo<span>Essay</span></h1>
+    <p class="lead">The register for your class. Sign in with the teacher account your students have shared their folders with.</p>
+    <button class="signin" onclick="signIn()">Sign in with Google</button>
+    <div class="autherr" id="authErr"></div>
+  </div>
+</div>
+
+<div class="screen" id="loading">
+  <div class="spin"></div>
+  <div id="loadMsg">Reading the class…</div>
+</div>
+
+<div class="screen" id="app">
+<div class="wrap">
+  <header>
+    <div><div class="eb">PhotoEssay · Teacher</div><h1 id="className">Personal Investigation</h1></div>
+    <div class="who" id="who"></div>
+  </header>
+  <div class="meta" id="meta"></div>
+  <table id="reg"><thead id="regHead"></thead><tbody id="regBody"></tbody></table>
+  <div id="emptyState"></div>
+  <p class="note">Everything here is read from each student's Google Doc: a word count, a date, a tally. Nothing is a judgement. The notes column counts bracketed prompts still in the document. Choose a name to see the rhythm of their work over the term, which is for talking with them about, not for marking.</p>
+</div>
+</div>
+
+<div id="layer" onclick="if(event.target===this)closeStudent()">
+  <div class="sheet">
+    <div class="top">
+      <div><h2 id="sName">—</h2><div class="em" id="sSub">—</div></div>
+      <a id="sOpen" href="#" target="_blank" rel="noopener">Open the Doc ↗</a>
+      <button class="close" onclick="closeStudent()">×</button>
+    </div>
+    <div class="rhythm">
+      <div class="cap">The rhythm of the work · this term</div>
+      <div id="waveWrap"></div>
+      <div class="axis" id="waveAxis"></div>
+    </div>
+    <div class="facts" id="sFacts"></div>
+    <p class="sheetnote">Each bar is how much the document grew between one reading and the next, recorded a point a day when the student opens the app. The shape is a way in to a conversation about how someone works, not a measure of how well.</p>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* ===== shared parser: identical to the student app ===== */
+const SECTION_MAP = [
+  {key:'Introduction', match:/introduction|focus/i, budget:200},
+  {key:'Contextual', match:/contextual|historical|background/i, budget:650},
+  {key:'Critical', match:/critical|analysis/i, budget:650},
+  {key:'Practice', match:/practice|development/i, budget:650},
+  {key:'Reflection', match:/reflection|conclusion/i, budget:200},
+  {key:'Bibliography', match:/bibliography|references/i, budget:0}
+];
+const WC_MAX=3400, WC_LO=1000, WC_HI=3000;
+
+function emptyParse(){ return {title:'', sections:{}, total:0, hasTitle:false, bibCount:0, bibTouched:false, figCount:0, imageCount:0, unlabelledImages:0, tcMentioned:false, bracketsLeft:0}; }
+
+/* Walk the Docs API document tree.
+   Headings (named styles HEADING_1) delimit sections; we tally words per section,
+   exclude the bibliography and any figure-caption paragraph (starts "Fig."),
+   and note observable facts for the checklist. */
+function parseDoc(doc){
+  const out = emptyParse();
+  out.title = (doc.title||'').replace(/ \u2014 Personal Investigation$/,'').replace(/Personal Investigation$/,'').trim();
+  const body = (doc.body && doc.body.content) || [];
+  let current = null;
+  const counts = {};
+  let titleSeen=false;
+
+  function paraText(el){
+    let s='';
+    (el.paragraph.elements||[]).forEach(pe=>{ if(pe.textRun && pe.textRun.content) s+=pe.textRun.content; });
+    return s;
+  }
+  function wordCount(s){ const t=s.replace(/\s+/g,' ').trim(); return t?t.split(' ').length:0; }
+  // a caption: "Fig" or "Figure", optional dot, a number, then anything. Case-insensitive.
+  const CAP = /^fig(?:ure|s|\.)?\.?\s*\d/i;
+
+  // first pass: flatten to a list of paragraph facts, keeping order
+  const paras = [];
+  body.forEach(el=>{
+    if(!el.paragraph) return;
+    const p = el.paragraph;
+    const style = (p.paragraphStyle && p.paragraphStyle.namedStyleType) || 'NORMAL_TEXT';
+    const text = paraText(el).trim();
+    const hasImage = (p.elements||[]).some(pe=>pe.inlineObjectElement);
+    paras.push({style, text, hasImage});
+  });
+
+  // second pass: walk with lookahead
+  for(let i=0;i<paras.length;i++){
+    const {style, text, hasImage} = paras[i];
+
+    if(style==='TITLE'){ if(text && text!=='Your title here') titleSeen=true; continue; }
+    if(style==='SUBTITLE') continue;
+    if(style==='HEADING_1'){
+      const m = SECTION_MAP.find(s=>s.match.test(text));
+      current = m ? m.key : null;
+      if(current && counts[current]===undefined) counts[current]=0;
+      continue;
+    }
+
+    const isPlaceholder = /^start typing here/i.test(text);
+    if(isPlaceholder) continue;
+    if(/^\[.*\]$/.test(text) || (text.startsWith('[') && !text.endsWith(']') && text.length<400 && /delete this note|delete all the grey notes/i.test(text))) out.bracketsLeft++;
+    if(/threshold concept/i.test(text)) out.tcMentioned = true;
+
+    const isCaption = CAP.test(text);
+    if(isCaption) out.figCount++;
+    if(hasImage) out.imageCount++;
+
+    // An image is captioned if the run of consecutive images it belongs to
+    // is closed by a caption. This handles a single image closed by "Fig." and
+    // a stacked or side-by-side pair closed by one "Figs." caption. Prose
+    // between images breaks the run, so a truly bare image is still caught.
+    if(hasImage){
+      // only assess at the start of an image run, to avoid double counting
+      const prevWasImageRun = (()=>{ let k=i-1; while(k>=0 && !paras[k].text && !paras[k].hasImage) k--; return k>=0 && paras[k].hasImage; })();
+      if(!prevWasImageRun){
+        // count the images in this run and find what follows it
+        let runImages=0, j=i;
+        while(j<paras.length){
+          if(paras[j].hasImage){ runImages++; j++; continue; }
+          if(!paras[j].text){ j++; continue; }   // blank line inside the run
+          break;                                  // first non-empty, non-image paragraph
+        }
+        const closedByCaption = j<paras.length && CAP.test(paras[j].text);
+        if(!closedByCaption) out.unlabelledImages += runImages;
+      }
+    }
+
+    if(current==='Bibliography'){
+      if(text && !/^\[/.test(text)) out.bibCount++;
+      continue;
+    }
+    if(current && !isCaption && !/^\[/.test(text)){
+      counts[current] = (counts[current]||0) + wordCount(text);
+    }
+  }
+
+  out.sections = counts;
+  out.total = Object.keys(counts).reduce((n,k)=> k==='Bibliography'?n:(n+counts[k]), 0);
+  out.hasTitle = titleSeen;
+  return out;
+}
+
+function parseDoc(doc){
+  const out = emptyParse();
+  out.title = (doc.title||'').replace(/ \u2014 Personal Investigation$/,'').replace(/Personal Investigation$/,'').trim();
+  const body = (doc.body && doc.body.content) || [];
+  let current = null;
+  const counts = {};
+  let titleSeen=false;
+
+  function paraText(el){
+    let s='';
+    (el.paragraph.elements||[]).forEach(pe=>{ if(pe.textRun && pe.textRun.content) s+=pe.textRun.content; });
+    return s;
+  }
+  function wordCount(s){ const t=s.replace(/\s+/g,' ').trim(); return t?t.split(' ').length:0; }
+  // a caption: "Fig" or "Figure", optional dot, a number, then anything. Case-insensitive.
+  const CAP = /^fig(?:ure|s|\.)?\.?\s*\d/i;
+
+  // first pass: flatten to a list of paragraph facts, keeping order
+  const paras = [];
+  body.forEach(el=>{
+    if(!el.paragraph) return;
+    const p = el.paragraph;
+    const style = (p.paragraphStyle && p.paragraphStyle.namedStyleType) || 'NORMAL_TEXT';
+    const text = paraText(el).trim();
+    const hasImage = (p.elements||[]).some(pe=>pe.inlineObjectElement);
+    paras.push({style, text, hasImage});
+  });
+
+  // second pass: walk with lookahead
+  for(let i=0;i<paras.length;i++){
+    const {style, text, hasImage} = paras[i];
+
+    if(style==='TITLE'){ if(text && text!=='Your title here') titleSeen=true; continue; }
+    if(style==='SUBTITLE') continue;
+    if(style==='HEADING_1'){
+      const m = SECTION_MAP.find(s=>s.match.test(text));
+      current = m ? m.key : null;
+      if(current && counts[current]===undefined) counts[current]=0;
+      continue;
+    }
+
+    const isPlaceholder = /^start typing here/i.test(text);
+    if(isPlaceholder) continue;
+    if(/^\[.*\]$/.test(text) || (text.startsWith('[') && !text.endsWith(']') && text.length<400 && /delete this note|delete all the grey notes/i.test(text))) out.bracketsLeft++;
+    if(/threshold concept/i.test(text)) out.tcMentioned = true;
+
+    const isCaption = CAP.test(text);
+    if(isCaption) out.figCount++;
+    if(hasImage) out.imageCount++;
+
+    // An image is captioned if the run of consecutive images it belongs to
+    // is closed by a caption. This handles a single image closed by "Fig." and
+    // a stacked or side-by-side pair closed by one "Figs." caption. Prose
+    // between images breaks the run, so a truly bare image is still caught.
+    if(hasImage){
+      // only assess at the start of an image run, to avoid double counting
+      const prevWasImageRun = (()=>{ let k=i-1; while(k>=0 && !paras[k].text && !paras[k].hasImage) k--; return k>=0 && paras[k].hasImage; })();
+      if(!prevWasImageRun){
+        // count the images in this run and find what follows it
+        let runImages=0, j=i;
+        while(j<paras.length){
+          if(paras[j].hasImage){ runImages++; j++; continue; }
+          if(!paras[j].text){ j++; continue; }   // blank line inside the run
+          break;                                  // first non-empty, non-image paragraph
+        }
+        const closedByCaption = j<paras.length && CAP.test(paras[j].text);
+        if(!closedByCaption) out.unlabelledImages += runImages;
+      }
+    }
+
+    if(current==='Bibliography'){
+      if(text && !/^\[/.test(text)) out.bibCount++;
+      continue;
+    }
+    if(current && !isCaption && !/^\[/.test(text)){
+      counts[current] = (counts[current]||0) + wordCount(text);
+    }
+  }
+
+  out.sections = counts;
+  out.total = Object.keys(counts).reduce((n,k)=> k==='Bibliography'?n:(n+counts[k]), 0);
+  out.hasTitle = titleSeen;
+  return out;
+}
+
+function rel(iso){
+  if(!iso) return '';
+  const d=new Date(iso), now=new Date(), mins=Math.floor((now-d)/60000);
+  if(mins<2) return 'just now';
+  if(mins<60) return mins+' minutes ago';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24) return hrs===1?'an hour ago':hrs+' hours ago';
+  const days=Math.floor(hrs/24);
+  if(days===1) return 'yesterday';
+  if(days<7) return days+' days ago';
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+const CLIENT_ID='1061675050152-1b4mn398mth6a3hfim1o0p8uktpqokr3.apps.googleusercontent.com';
+const SCOPE='https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents.readonly';
+const DRIVE='https://www.googleapis.com/drive/v3';
+const DOCS='https://docs.googleapis.com/v1/documents';
+const FOLDER_NAME='AQA Photography Essay';
+const $=id=>document.getElementById(id);
+function esc(t){const d=document.createElement('div');d.textContent=t==null?'':t;return d.innerHTML;}
+
+let accessToken=null, tokenClient=null, COHORT=[], sortKey='name', sortDir=1;
+
+window.addEventListener('load',()=>{
+  const t=setInterval(()=>{
+    if(window.google&&google.accounts){
+      clearInterval(t);
+      tokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID, scope:SCOPE,
+        callback:async r=>{
+          if(r.error){ authErr('Sign-in was refused ('+r.error+').'); return; }
+          accessToken=r.access_token; show('loading');
+          try{ await loadCohort(); }catch(e){ console.error(e); show('auth'); authErr('Could not read the class: '+e.message); }
+        }
+      });
+    }
+  },100);
+});
+function signIn(){ if(!tokenClient){authErr('Google sign-in is still loading, try again in a moment.');return;} tokenClient.requestAccessToken({prompt:''}); }
+function authErr(m){ const e=$('authErr'); e.textContent=m; e.style.display='block'; }
+function show(id){ ['auth','loading','app'].forEach(s=>$(s).classList.remove('show')); $(id).classList.add('show'); }
+
+async function api(url){
+  const r=await fetch(url,{headers:{Authorization:'Bearer '+accessToken}});
+  if(r.status===401){ show('auth'); authErr('Your session expired. Sign in again.'); throw new Error('session expired'); }
+  if(!r.ok){ const t=await r.text(); const e=new Error(r.status+': '+t.slice(0,160)); e.status=r.status; throw e; }
+  return r.json();
+}
+async function driveList(q, fields){ const r=await api(DRIVE+'/files?q='+encodeURIComponent(q)+'&fields='+encodeURIComponent(fields||'files(id,name,mimeType,modifiedTime,owners(displayName,emailAddress))')+'&pageSize=100'); return r.files||[]; }
+async function docsGet(id){ return api(DOCS+'/'+id); }
+async function readJSON(id){ const r=await fetch(DRIVE+'/files/'+id+'?alt=media',{headers:{Authorization:'Bearer '+accessToken}}); if(!r.ok) return null; return r.json(); }
+
+async function loadCohort(){
+  $('loadMsg').textContent='Finding shared folders…';
+  const me=await api(DRIVE+'/about?fields=user');
+  $('who').innerHTML=esc(me.user.displayName||me.user.emailAddress);
+  const q="name='"+FOLDER_NAME+"' and mimeType='application/vnd.google-apps.folder' and sharedWithMe=true and trashed=false";
+  const folders=await driveList(q);
+  COHORT=[];
+  let i=0;
+  for(const f of folders){
+    i++; $('loadMsg').textContent='Reading essay '+i+' of '+folders.length+'…';
+    const owner=(f.owners&&f.owners[0])||{};
+    const rec={ folderId:f.id, name:owner.displayName||owner.emailAddress||'Unknown', email:owner.emailAddress||'', shared:true, parsed:null, docId:null, docModified:null, rhythm:null, meta:null };
+    try{
+      const kids=await driveList("'"+f.id+"' in parents and trashed=false", 'files(id,name,mimeType,modifiedTime)');
+      const doc=kids.find(k=>k.mimeType==='application/vnd.google-apps.document');
+      const metaFile=kids.find(k=>k.name==='meta.json');
+      const rhythmFile=kids.find(k=>k.name==='rhythm.json');
+      if(metaFile){ rec.meta=await readJSON(metaFile.id); }
+      if(doc){
+        rec.docId=doc.id; rec.docModified=doc.modifiedTime;
+        const d=await docsGet(doc.id);
+        rec.parsed=parseDoc(d);
+        if(!rec.parsed.title && rec.meta && rec.meta.title) rec.parsed.title=rec.meta.title;
+      }
+      if(rhythmFile){ const rj=await readJSON(rhythmFile.id); rec.rhythm = rj && Array.isArray(rj.points) ? rj.points : null; }
+    }catch(e){ console.warn('reading '+rec.name, e); rec.error=e.message; }
+    COHORT.push(rec);
+  }
+  show('app'); render();
+}
+
+const HEADERS=[['name','Student'],['words','Words'],['images','Images'],['bib','Bib.'],['notes','Notes'],['edited','Last edited'],['signoff','Sign-off']];
+function render(){
+  const shared=COHORT.filter(c=>c.shared);
+  $('meta').innerHTML='<div><b>'+shared.length+'</b> shared with you</div><div>read just now</div><button class="refresh" onclick="reload()">refresh</button>';
+  if(!shared.length){
+    $('reg').style.display='none';
+    $('emptyState').innerHTML='<div class="empty">No folders have been shared with this account yet.<br>When a student shares their <b>'+FOLDER_NAME+'</b> folder, they will appear here.</div>';
+    return;
+  }
+  $('reg').style.display=''; $('emptyState').innerHTML='';
+  $('regHead').innerHTML='<tr>'+HEADERS.map(h=>{
+    const on=sortKey===h[0];
+    return '<th onclick="sortBy(\''+h[0]+'\')">'+h[1]+(on?' <span class="ar">'+(sortDir>0?'\u25B2':'\u25BC')+'</span>':'')+'</th>';
+  }).join('')+'</tr>';
+  const rows=[...COHORT].sort(comparator);
+  $('regBody').innerHTML=rows.map(rowHTML).join('');
+}
+function surnameKey(name){ const p=name.trim().split(/\s+/); return (p.length>1?p.slice(1).join(' '):name).replace(/-/g,' ').toLowerCase(); }
+function comparator(a,b){
+  if(sortKey==='name') return surnameKey(a.name).localeCompare(surnameKey(b.name))*sortDir;
+  const val=c=>{
+    if(!c.parsed) return sortDir>0?Infinity:-Infinity;
+    if(sortKey==='words') return c.parsed.total;
+    if(sortKey==='images') return c.parsed.imageCount;
+    if(sortKey==='bib') return c.parsed.bibCount;
+    if(sortKey==='notes') return c.parsed.bracketsLeft;
+    if(sortKey==='edited') return c.docModified?new Date(c.docModified).getTime():0;
+    if(sortKey==='signoff') return (c.meta&&c.meta.signoffRequestedAt)?1:0;
+    return 0;
+  };
+  return (val(a)-val(b))*sortDir;
+}
+function sortBy(k){ if(sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=(k==='name')?1:-1; } render(); }
+
+function rowHTML(c){
+  const P=c.parsed;
+  if(!P) return '<tr class="notshared"><td><button class="nm">'+esc(c.name)+'<span class="sub">essay not readable</span></button></td><td>\u2014</td><td>\u2014</td><td>\u2014</td><td>\u2014</td><td>\u2014</td><td></td></tr>';
+  const stale = c.docModified && (Date.now()-new Date(c.docModified).getTime())>12*864e5;
+  const notes = P.bracketsLeft>=5 ? '<span class="flag">'+P.bracketsLeft+'</span>' : P.bracketsLeft;
+  const sign = (c.meta&&c.meta.signoffRequestedAt)?'<span class="chip await">requested</span>':'';
+  return '<tr class="clickable" onclick="openStudent(\''+c.folderId+'\')">'+
+    '<td><button class="nm">'+esc(c.name)+'<span class="sub">'+esc(P.title||'Untitled so far')+'</span></button></td>'+
+    '<td class="wc"><b>'+P.total.toLocaleString()+'</b></td>'+
+    '<td>'+P.imageCount+'</td><td>'+P.bibCount+'</td><td>'+notes+'</td>'+
+    '<td class="'+(stale?'stale':'')+'">'+rel(c.docModified)+'</td><td>'+sign+'</td></tr>';
+}
+
+function openStudent(folderId){
+  const c=COHORT.find(x=>x.folderId===folderId); if(!c||!c.parsed) return;
+  const P=c.parsed;
+  $('sName').textContent=c.name;
+  $('sSub').textContent=P.title||'Untitled so far';
+  $('sOpen').href = c.docId ? 'https://docs.google.com/document/d/'+c.docId+'/edit' : '#';
+  drawWave(c.rhythm);
+  $('sFacts').innerHTML=
+    fact('Words', P.total.toLocaleString())+fact('Images', P.imageCount)+
+    fact('Bibliography', P.bibCount+(P.bibCount===1?' entry':' entries'))+
+    fact('Notes still in', P.bracketsLeft)+fact('Last edited', rel(c.docModified))+
+    fact('Sign-off', (c.meta&&c.meta.signoffRequestedAt)?'requested':'not yet');
+  $('layer').classList.add('show');
+}
+function fact(k,v){ return '<div class="f"><span>'+k+'</span><b>'+esc(String(v))+'</b></div>'; }
+function closeStudent(){ $('layer').classList.remove('show'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeStudent(); });
+
+function drawWave(points){
+  const wrap=$('waveWrap'), axis=$('waveAxis');
+  if(!points || points.length<2){
+    wrap.innerHTML='<div class="rnodata">Not enough recorded yet to show a rhythm. The wave builds as the term goes on, a point each day the student opens the app.</div>';
+    axis.innerHTML=''; return;
+  }
+  const growth=points.map((p,i)=> i===0 ? 0 : Math.max(0, p.w - points[i-1].w));
+  const W=620,H=120,n=growth.length,gap=Math.max(1,4-Math.floor(n/40)),bw=(W-(n-1)*gap)/n;
+  const max=Math.max(...growth,1);
+  let bars='';
+  growth.forEach((v,i)=>{
+    const h=Math.max(2, v/max*(H-10)), x=i*(bw+gap), y=H-h;
+    bars+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="1.5" fill="'+(v===0?'#ECE8E8':'#2E6C88')+'"/>';
+  });
+  wrap.innerHTML='<svg class="wave" viewBox="0 0 620 120" preserveAspectRatio="none">'+bars+'</svg>';
+  axis.innerHTML='<span>'+fmtDate(points[0].d)+'</span><span>'+fmtDate(points[points.length-1].d)+'</span>';
+}
+function fmtDate(d){ try{ return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }catch(e){ return d; } }
+async function reload(){ show('loading'); try{ await loadCohort(); }catch(e){ show('app'); } }
+</script>
+</body>
+</html>
